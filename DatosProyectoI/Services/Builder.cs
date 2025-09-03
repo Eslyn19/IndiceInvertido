@@ -154,21 +154,23 @@ namespace DatosProyectoI.Services
                 double diferencia = Math.Abs(terminosArr[i].frecuencia - frecuenciaEsperada);
             }
         }
-        private double CalcularMagnitud(double[] vector)
+
+        private double CalcularMagnitud(double[] arr)
         {
             double suma = 0;
-            foreach (var val in vector)
+            foreach (var val in arr)
             {
                 suma += val * val;
             }
             return Math.Sqrt(suma);
         }
-        private double CalcularProductoPunto(double[] v1, double[] v2)
+
+        private double CalcularProductoPunto(double[] arr, double[] arr2)
         {
             double suma = 0;
-            for (int i = 0; i < v1.Length; i++)
+            for (int i = 0; i < arr.Length; i++)
             {
-                suma += v1[i] * v2[i];
+                suma += arr[i] * arr2[i];
             }
             return suma;
         }

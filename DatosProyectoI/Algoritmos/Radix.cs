@@ -61,5 +61,6 @@ namespace DatosProyectoI.Algoritmos
                 terminos[i] = resultado[i];
             }
         }
+
     }
 }

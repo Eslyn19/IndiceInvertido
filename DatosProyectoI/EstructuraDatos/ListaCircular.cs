@@ -6,7 +6,9 @@ namespace DatosProyectoI.EstructuraDatos
     internal class ListaCircular<T> : ICollection<T>
     {
         private Nodo<T> cabeza;
+        
         private int contador;
+        
         public ListaCircular()
         {
             cabeza = null;    
@@ -15,7 +17,9 @@ namespace DatosProyectoI.EstructuraDatos
 
         // Metodos implementados de Libreria ICollection
         public int Count => contador;
+
         public bool IsReadOnly => false;
+        
         public void Add(T item)
         {
             Nodo<T> nuevo = new Nodo<T>(item);
@@ -36,11 +40,13 @@ namespace DatosProyectoI.EstructuraDatos
             }
             contador++;
         }
+
         public void Clear()
         {
             cabeza = null;
             contador = 0;
         }
+
         public bool Contains(T item)
         {
             if (cabeza == null)
@@ -60,6 +66,7 @@ namespace DatosProyectoI.EstructuraDatos
             
             return false;
         }
+
         public bool Remove(T item)
         {
             if (cabeza == null)
@@ -95,10 +102,12 @@ namespace DatosProyectoI.EstructuraDatos
 
             return false;
         }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
+
         public void CopyTo(T[] array, int arrayIndex)
         {
             throw new NotImplementedException();
@@ -118,5 +127,6 @@ namespace DatosProyectoI.EstructuraDatos
                 actual = actual.siguiente;
             } while (actual != cabeza);
         }
+
     }
 }
