@@ -107,7 +107,9 @@ namespace DatosProyectoI.EstructuraDatos
         public IEnumerator<T> GetEnumerator()
         {
             if (cabeza == null)
+            {
                 yield break;
+            }
 
             Nodo<T> actual = cabeza;
             do

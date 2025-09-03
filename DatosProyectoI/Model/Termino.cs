@@ -4,8 +4,8 @@ namespace DatosProyectoI.Model
 {
     internal class Termino
     {
-        public string palabra { get; set; } // termino
-        public int frecuencia { get; set; } // frecuencia por documento
+        public string palabra { get; set; }
+        public int frecuencia { get; set; } 
         public int DocumentosCont { get; set; } // contenedor documentos
         public ListaCircular<Documento> Documentos { get; set; } // lista de documentos
         public double IDF { get; set; } // indice de rareza

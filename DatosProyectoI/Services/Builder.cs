@@ -156,10 +156,10 @@ namespace DatosProyectoI.Services
             }
         }
 
-        private double CalcularSimilitudCoseno(List<string> terminosConsulta, Documento documento)
+        private double CalcularSimilitudCoseno(List<string> terminosConsulta, Documento doc)
         {
-            double[] vectorDocumento = new double[terminosConsulta.Count];
-            double magnitudDocumento = 0;
+            double[] DocumentoArr = new double[terminosConsulta.Count];
+            double magnitudDoc = 0;
             
             for (int i = 0; i < terminosConsulta.Count; i++)
             {
@@ -178,41 +178,41 @@ namespace DatosProyectoI.Services
                 
                 if (termino != null)
                 {
-                    vectorDocumento[i] = termino.CalcularTFIDF(documento);
+                    DocumentoArr[i] = termino.CalcularTFIDF(doc);
                 }
                 else
                 {
-                    vectorDocumento[i] = 0;
+                    DocumentoArr[i] = 0;
                 }
                 
-                magnitudDocumento += vectorDocumento[i] * vectorDocumento[i];
+                magnitudDoc += DocumentoArr[i] * DocumentoArr[i];
             }
             
-            magnitudDocumento = Math.Sqrt(magnitudDocumento);
+            magnitudDoc = Math.Sqrt(magnitudDoc);
 
-            if (magnitudDocumento == 0)
+            if (magnitudDoc == 0)
             {
                 return 0;
             }
             
-            // Crear vector de la consulta (todos los términos tienen peso 1, normalizado)
-            double[] vectorConsulta = new double[terminosConsulta.Count];
+            // Crear vector de la consulta
+            double[] ConsultaArr = new double[terminosConsulta.Count];
             for (int i = 0; i < terminosConsulta.Count; i++)
             {
-                vectorConsulta[i] = 1.0; // Cada término en la consulta tiene peso 1
+                ConsultaArr[i] = 1.0; // termino con peso 1
             }
             
             // Magnitud de la consulta
             double magnitudConsulta = Math.Sqrt(terminosConsulta.Count);
             
             // Calcular producto punto
-            double productoPunto = 0;
+            double prodPunto = 0;
             for (int i = 0; i < terminosConsulta.Count; i++)
             {
-                productoPunto += vectorConsulta[i] * vectorDocumento[i];
+                prodPunto += ConsultaArr[i] * DocumentoArr[i];
             }
             
-            return productoPunto / (magnitudConsulta * magnitudDocumento);
+            return prodPunto / (magnitudConsulta * magnitudDoc);
         }
 
         public void Consultar(string consulta)
@@ -228,7 +228,7 @@ namespace DatosProyectoI.Services
                 }
             }
 
-            // Buscar documentos que contengan los términos
+            // Buscar documentos que contengan los terminos
             var DocsImportantes = new ListaCircular<Documento>();
             
             foreach (string terminoStr in terminosConsulta)

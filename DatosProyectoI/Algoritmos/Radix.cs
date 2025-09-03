@@ -8,19 +8,19 @@ namespace DatosProyectoI.Algoritmos
         {
             if (terminos == null || terminos.Length <= 1)
             {
-                return;
+                return; // si es vacio
             }
 
             // Encontrar la frecuencia maxima
-            int maxFrecuencia = 0;
-            foreach (var t in terminos)
+            int mx = 0;
+            for (int i = 0; i < terminos.Length; i++)
             {
-                if (t.frecuencia > maxFrecuencia)
-                    maxFrecuencia = t.frecuencia;
+                if (terminos[i].frecuencia > mx)
+                    mx = terminos[i].frecuencia;
             }
 
             // Aplicar ordenamiento radix
-            for (int exp = 1; maxFrecuencia / exp > 0; exp *= 10)
+            for (int exp = 1; mx / exp > 0; exp *= 10)
             {
                 OrdenarPorDigito(terminos, exp);
             }
