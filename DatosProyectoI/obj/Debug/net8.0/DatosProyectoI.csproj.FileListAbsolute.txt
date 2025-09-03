@@ -1,0 +1,14 @@
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\bin\Debug\net8.0\DatosProyectoI.exe
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\bin\Debug\net8.0\DatosProyectoI.deps.json
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\bin\Debug\net8.0\DatosProyectoI.runtimeconfig.json
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\bin\Debug\net8.0\DatosProyectoI.dll
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\bin\Debug\net8.0\DatosProyectoI.pdb
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\obj\Debug\net8.0\DatosProyectoI.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\obj\Debug\net8.0\DatosProyectoI.AssemblyInfoInputs.cache
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\obj\Debug\net8.0\DatosProyectoI.AssemblyInfo.cs
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\obj\Debug\net8.0\DatosProyectoI.csproj.CoreCompileInputs.cache
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\obj\Debug\net8.0\DatosProyectoI.dll
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\obj\Debug\net8.0\refint\DatosProyectoI.dll
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\obj\Debug\net8.0\DatosProyectoI.pdb
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\obj\Debug\net8.0\DatosProyectoI.genruntimeconfig.cache
+C:\Users\jaraa\OneDrive\Desktop\DatosProyectoI\DatosProyectoI\obj\Debug\net8.0\ref\DatosProyectoI.dll
