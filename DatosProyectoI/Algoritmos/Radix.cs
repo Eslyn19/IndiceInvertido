@@ -31,10 +31,10 @@ namespace DatosProyectoI.Algoritmos
 
         private static void OrdenarPorDigito(Termino[] terminos, int exp)
         {
-            int[] conteo = new int[10]; 
+            int[] conteo = new int[10]; // Digitos posibles 0-9
             Termino[] resultado = new Termino[terminos.Length];
 
-            // Contar la frecuencia de cada dígito
+            // Contar la frecuencia de cada digito
             foreach (var t in terminos)
             {
                 int digito = (t.frecuencia / exp) % 10;
@@ -54,7 +54,8 @@ namespace DatosProyectoI.Algoritmos
                 resultado[conteo[digito] - 1] = terminos[i];
                 conteo[digito]--;
             }
-
+    
+            // Pasa los elementos ordenados a el arreglo original
             for (int i = 0; i < terminos.Length; i++)
             {
                 terminos[i] = resultado[i];

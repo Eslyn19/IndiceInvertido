@@ -44,7 +44,7 @@ namespace DatosProyectoI.Services
                 "el", "la", "lo", "los", "las", "un", "una", "unos", "unas",
                 "de", "del", "en", "con", "por", "para", "sobre", "bajo",
                 "entre", "durante", "desde", "hasta", "hacia", "contra",
-                "sin", "según", "mediante", "excepto", "salvo", "menos",
+                "sin", "segun", "mediante", "excepto", "salvo", "menos",
                 "más", "muy", "mucho", "poco", "bastante", "demasiado",
                 "todo", "toda", "todos", "todas", "alguno", "alguna",
                 "algunos", "algunas", "ninguno", "ninguna", "ningunos", "ningunas",
@@ -54,7 +54,7 @@ namespace DatosProyectoI.Services
                 "donde", "quien", "cual", "cuyo", "cuya", "cuyos", "cuyas",
                 "es", "son", "está", "están", "era", "eran", "fue", "fueron",
                 "será", "serán", "ha", "han", "había", "habían", "habrá", "habrán",
-                "tiene", "tienen", "tenía", "tenían", "tendrá", "tendrán",
+                "tiene", "tienen", "tendrá", "tendrán",
                 "puede", "pueden", "podía", "podían", "podrá", "podrán",
                 "debe", "deben", "debía", "debían", "deberá", "deberán",
                 "quiere", "quieren", "quería", "querían", "querrá", "querrán", 
@@ -80,11 +80,10 @@ namespace DatosProyectoI.Services
                 }
                 
                 string[] archivos = Directory.GetFiles(rutaCompleta, "*.txt");
-                
-                foreach (string archivo in archivos)
+                foreach (string file in archivos)
                 {
-                    string nombre = Path.GetFileName(archivo);
-                    string contenido = File.ReadAllText(archivo, System.Text.Encoding.UTF8);
+                    string nombre = Path.GetFileName(file);
+                    string contenido = File.ReadAllText(file, System.Text.Encoding.UTF8);
                     
                     Documento documento = new Documento(nombre, contenido);
                     documento.ProcesarDoc(stopwords); 
@@ -155,17 +154,34 @@ namespace DatosProyectoI.Services
                 double diferencia = Math.Abs(terminosArr[i].frecuencia - frecuenciaEsperada);
             }
         }
+        private double CalcularMagnitud(double[] vector)
+        {
+            double suma = 0;
+            foreach (var val in vector)
+            {
+                suma += val * val;
+            }
+            return Math.Sqrt(suma);
+        }
+        private double CalcularProductoPunto(double[] v1, double[] v2)
+        {
+            double suma = 0;
+            for (int i = 0; i < v1.Length; i++)
+            {
+                suma += v1[i] * v2[i];
+            }
+            return suma;
+        }
 
         private double CalcularSimilitudCoseno(List<string> terminosConsulta, Documento doc)
         {
             double[] DocumentoArr = new double[terminosConsulta.Count];
-            double magnitudDoc = 0;
-            
+
             for (int i = 0; i < terminosConsulta.Count; i++)
             {
                 string terminoStr = terminosConsulta[i];
-                
-                // Buscar el termino en el indice
+
+                // buscar termino
                 Termino termino = null;
                 foreach (Termino t in terminos)
                 {
@@ -175,45 +191,28 @@ namespace DatosProyectoI.Services
                         break;
                     }
                 }
-                
-                if (termino != null)
-                {
-                    DocumentoArr[i] = termino.CalcularTFIDF(doc);
-                }
-                else
-                {
-                    DocumentoArr[i] = 0;
-                }
-                
-                magnitudDoc += DocumentoArr[i] * DocumentoArr[i];
-            }
-            
-            magnitudDoc = Math.Sqrt(magnitudDoc);
 
-            if (magnitudDoc == 0)
-            {
-                return 0;
+                DocumentoArr[i] = termino != null ? termino.CalcularTFIDF(doc) : 0;
             }
-            
-            // Crear vector de la consulta
+
+            double magnitudDoc = CalcularMagnitud(DocumentoArr);
+            if (magnitudDoc == 0) 
+            { 
+                return 0; 
+            }
+
             double[] ConsultaArr = new double[terminosConsulta.Count];
             for (int i = 0; i < terminosConsulta.Count; i++)
             {
-                ConsultaArr[i] = 1.0; // termino con peso 1
+                ConsultaArr[i] = 1.0; // producto con peso 1
             }
-            
-            // Magnitud de la consulta
-            double magnitudConsulta = Math.Sqrt(terminosConsulta.Count);
-            
-            // Calcular producto punto
-            double prodPunto = 0;
-            for (int i = 0; i < terminosConsulta.Count; i++)
-            {
-                prodPunto += ConsultaArr[i] * DocumentoArr[i];
-            }
-            
+
+            double magnitudConsulta = CalcularMagnitud(ConsultaArr);
+            double prodPunto = CalcularProductoPunto(ConsultaArr, DocumentoArr);
+
             return prodPunto / (magnitudConsulta * magnitudDoc);
         }
+
 
         public void Consultar(string consulta)
         {
