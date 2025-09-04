@@ -108,7 +108,7 @@ namespace DatosProyectoI.EstructuraDatos
             return GetEnumerator();
         }
 
-        public void CopyTo(T[] array, int arrayIndex)
+        public void CopyTo(T[] artray, int arrayIndex)
         {
             throw new NotImplementedException();
         }

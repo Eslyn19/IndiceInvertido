@@ -38,19 +38,19 @@ namespace DatosProyectoI.Services
 
         public int DocumentosCount => documentos.Count;
 
-        public void CrearRuta()
-        {
-            Console.WriteLine("Ingrese la ruta donde se encuentran los documentos:");
-            string rutaDocs = Console.ReadLine();
+        //public void CrearRuta()
+        //{
+        //    Console.WriteLine("Ingrese la ruta donde se encuentran los documentos:");
+        //    string rutaDocs = Console.ReadLine();
             
-            if (string.IsNullOrWhiteSpace(rutaDocs))
-            {
-                Console.WriteLine("Ruta no válida. Usando ruta por defecto: ../../../../Documentos2");
-                rutaDocs = "../../../../Documentos2";
-            }
+        //    if (string.IsNullOrWhiteSpace(rutaDocs))
+        //    {
+        //        Console.WriteLine("Ruta no válida. Usando ruta por defecto: ../../../../Documentos2");
+        //        rutaDocs = "../../../../Documentos2";
+        //    }
             
-            CargarDocumentos(rutaDocs);
-        }
+        //    CargarDocumentos(rutaDocs);
+        //}
 
         private void CargarStopwords()
         {
@@ -172,9 +172,9 @@ namespace DatosProyectoI.Services
         private double CalcularMagnitud(double[] arr)
         {
             double suma = 0;
-            foreach (var val in arr)
+            for (int i = 0; i < arr.Length; i++)
             {
-                suma += val * val;
+                suma += arr[i] * arr[i];
             }
             return Math.Sqrt(suma);
         }
@@ -228,7 +228,6 @@ namespace DatosProyectoI.Services
 
             return prodPunto / (magnitudConsulta * magnitudDoc);
         }
-
 
         public void Consultar(string consulta)
         {

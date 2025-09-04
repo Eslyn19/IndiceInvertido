@@ -8,13 +8,12 @@ namespace DatosProyectoI.UI
         {
             Builder builder = Builder.getInstance();
 
-            string rutaDocs = "../../../../Documentos2";
+            string rutaDocs = "../../../../Documentos";
             builder.CargarDocumentos(rutaDocs);
 
             double porcentajeZipf = SolicitarPorcentaje();
 
             builder.ConstruirIndiceInvertido();
-
             builder.AplicarLeyZipf(porcentajeZipf);
             
             string consulta;
