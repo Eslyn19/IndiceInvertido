@@ -4,32 +4,37 @@ namespace DatosProyectoI.Algoritmos
 {
     internal class OrdenamientoRadix
     {
-        public static void OrdenarPorFrecuencia(Termino[] terminos)
+        public static void RadixSort(Termino[] terminos)
         {
             if (terminos == null || terminos.Length <= 1)
             {
                 return; // si es vacio
             }
 
-            // Encontrar la frecuencia maxima
-            int mx = 0;
-            for (int i = 0; i < terminos.Length; i++)
-            {
-                if (terminos[i].frecuencia > mx)
-                    mx = terminos[i].frecuencia;
-            }
+            int mx = GetMax(terminos);
 
             // Aplicar ordenamiento radix
             for (int exp = 1; mx / exp > 0; exp *= 10)
             {
-                OrdenarPorDigito(terminos, exp);
+                CountSort(terminos, exp);
             }
 
             // Invertir orden en ascendente
             Array.Reverse(terminos);
         }
 
-        private static void OrdenarPorDigito(Termino[] terminos, int exp)
+        private static int GetMax(Termino[] terminos)
+        {
+            int mx = terminos[0].frecuencia;
+            for (int i = 1; i < terminos.Length; i++)
+            {
+                if (terminos[i].frecuencia > mx)
+                    mx = terminos[i].frecuencia;
+            }
+            return mx;
+        }
+
+        private static void CountSort(Termino[] terminos, int exp)
         {
             int[] conteo = new int[10]; // Digitos posibles 0-9
             Termino[] resultado = new Termino[terminos.Length];

@@ -38,6 +38,20 @@ namespace DatosProyectoI.Services
 
         public int DocumentosCount => documentos.Count;
 
+        public void CrearRuta()
+        {
+            Console.WriteLine("Ingrese la ruta donde se encuentran los documentos:");
+            string rutaDocs = Console.ReadLine();
+            
+            if (string.IsNullOrWhiteSpace(rutaDocs))
+            {
+                Console.WriteLine("Ruta no válida. Usando ruta por defecto: ../../../../Documentos2");
+                rutaDocs = "../../../../Documentos2";
+            }
+            
+            CargarDocumentos(rutaDocs);
+        }
+
         private void CargarStopwords()
         {
             stopwords = new string[] {
@@ -143,7 +157,7 @@ namespace DatosProyectoI.Services
             }
 
             // Ordenar por recorrido Radix
-            OrdenamientoRadix.OrdenarPorFrecuencia(terminosArr);
+            OrdenamientoRadix.RadixSort(terminosArr);
 
             int MaxFrec = terminosArr[0].frecuencia;
             int MostrarCant = Math.Max(1, (int)Math.Ceiling(terminosArr.Length * (porcentaje / 100.0)));
