@@ -16,6 +16,7 @@
 x64/
 [Bb]in/
 [Oo]bj/
+*.json
 
 # MSTest test Results
 [Tt]est[Rr]esult*/

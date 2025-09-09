@@ -1,56 +1,136 @@
-﻿using DatosProyectoI.Services;
+﻿using DatosProyectoI.Model;
+using DatosProyectoI.Services;
+using System.Text;
+using System.Linq;
 
 namespace DatosProyectoI.UI
 {
     internal class App
     {
+        private Builder procesador;
+        
+        public App()
+        {
+            procesador = Builder.getInstance();
+        }
+        
         public void IniciarAplicacion() 
         {
-            Builder builder = Builder.getInstance();
-
-            string rutaDocs = "../../../../Documentos";
-            builder.CargarDocumentos(rutaDocs);
-
-            double porcentajeZipf = SolicitarPorcentaje();
-
-            builder.ConstruirIndiceInvertido();
-            builder.AplicarLeyZipf(porcentajeZipf);
-            
-            string consulta;
-            do
-            {
-                Console.Write("\nIngresa tu consulta: ");
-                consulta = Console.ReadLine();
-                
-                builder.Consultar(consulta);
-            } while (consulta?.ToLower() != "salir") ;
+            MostrarMenu();
         }
 
-        private static double SolicitarPorcentaje()
+        private void MostrarMenu()
         {
-            double porcentaje;
-            bool ent = false;
-
-            do
+            bool continuar = true;
+            
+            while (continuar)
             {
-                Console.Write("Porcentaje para Ley de Zipf: ");
-                string entrada = Console.ReadLine();
-
-                if (double.TryParse(entrada, out porcentaje))
+                Console.Clear();
+                Console.WriteLine("=== SISTEMA DE BÚSQUEDA CON ÍNDICE PREPROCESADO ===");
+                Console.WriteLine();
+                Console.WriteLine("Opciones:");
+                Console.WriteLine("1. Procesar documentos y crear índice preprocesado");
+                Console.WriteLine("2. Cargar índice preprocesado existente");
+                Console.WriteLine("3. Realizar consulta");
+                Console.WriteLine("0. Salir");
+                Console.WriteLine();
+                Console.Write("Seleccione una opción: ");
+                
+                string opcion = Console.ReadLine();
+                
+                switch (opcion)
                 {
-                    if (porcentaje > 0 && porcentaje <= 100)
-                    {
-                        ent = true;
-                    }
-                    else
-                    {
-                        Console.WriteLine("El porcentaje debe estar entre 0 y 100.");
-                    }
+                    case "1":
+                        OpcionProcesarDocumentos();
+                        break;
+                    case "2":
+                        OpcionCargarIndice();
+                        break;
+                    case "3":
+                        OpcionConsulta();
+                        break;
+                    case "0":
+                        continuar = false;
+                        break;
+                    default:
+                        Console.WriteLine("Opcion invalida");
+                        Console.ReadLine();
+                        break;
                 }
-            } while (!ent);
-
-            return porcentaje;
+            }
         }
-
+        
+        private void OpcionProcesarDocumentos()
+        {
+            Console.Clear();
+            Console.WriteLine("=== PROCESAR DOCUMENTOS ===");
+            Console.WriteLine();
+            
+            // Ruta fija
+            string rutaDocs = "../../../../Documentos";
+            Console.WriteLine($"Ruta de documentos: {rutaDocs}");
+            
+            Console.WriteLine();
+            Console.Write("Ingrese el porcentaje de reducción con la ley de Zipf (0-90): ");
+            string porcentajeStr = Console.ReadLine();
+            
+            if (!double.TryParse(porcentajeStr, out double porcentaje) || porcentaje < 0 || porcentaje > 90)
+            {
+                Console.WriteLine("Porcentaje inválido. Usando 20% por defecto.");
+                porcentaje = 20.0;
+            }
+            
+            Console.WriteLine();
+            Console.WriteLine("Procesando documentos...");
+            
+            procesador.ProcesarDocumentos(rutaDocs, porcentaje);
+            
+            Console.WriteLine();
+            Console.WriteLine("Presione Enter para continuar...");
+            Console.ReadLine();
+        }
+        
+        private void OpcionCargarIndice()
+        {
+            Console.Clear();
+            Console.WriteLine("=== CARGAR ÍNDICE PREPROCESADO ===");
+            Console.WriteLine();
+            
+            Console.WriteLine("Cargando índice preprocesado...");
+            procesador.CargarIndicePreprocesado();
+            
+            Console.WriteLine();
+            Console.WriteLine("Presione Enter para continuar...");
+            Console.ReadLine();
+        }
+        
+        private void OpcionConsulta()
+        {
+            Console.Clear();
+            Console.WriteLine("=== REALIZAR CONSULTA ===");
+            Console.WriteLine();
+            
+            Console.Write("Ingrese su consulta: ");
+            string consulta = Console.ReadLine();
+            
+            if (string.IsNullOrWhiteSpace(consulta))
+            {
+                Console.WriteLine("Consulta vacía.");
+                Console.WriteLine("Presione Enter para continuar...");
+                Console.ReadLine();
+                return;
+            }
+            
+            Console.WriteLine();
+            Console.WriteLine("Procesando consulta...");
+            Console.WriteLine();
+            
+            procesador.Consultar(consulta);
+            
+            Console.WriteLine();
+            Console.WriteLine("Presione Enter para continuar...");
+            Console.ReadLine();
+        }
+        
     }
 }

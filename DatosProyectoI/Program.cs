@@ -6,8 +6,8 @@
 * NRC 51218 � Grupo 02 |
 * Proyecto 1 |
 * | Estudiantes:
-* -----------; Mishelle Rojas Chacon
 * 2-0838-0902; Jara Calderon, Eslyn |
+* 2-0864-0831; Mishelle Rojas Chacon
 * 7-0311-0431; Blanco Mora, Jeancarlo |
 * |
 * version 1.0.0

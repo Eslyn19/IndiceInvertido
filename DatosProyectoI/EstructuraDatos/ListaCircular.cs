@@ -17,7 +17,6 @@ namespace DatosProyectoI.EstructuraDatos
 
         // Metodos implementados de Libreria ICollection
         public int Count => contador;
-
         public bool IsReadOnly => false;
         
         public void Add(T item)
@@ -46,38 +45,30 @@ namespace DatosProyectoI.EstructuraDatos
             cabeza = null;
             contador = 0;
         }
-
+        
         public bool Contains(T item)
         {
-            if (cabeza == null)
-            {
-                return false; 
-            }
-
-            Nodo<T> aux = cabeza;
+            if (cabeza == null) return false;
+            
+            Nodo<T> actual = cabeza;
             do
             {
-                if (aux.dato.Equals(item))
-                {
+                if (actual.dato.Equals(item))
                     return true;
-                }
-                aux = aux.siguiente;
-            } while (aux != cabeza);
+                actual = actual.siguiente;
+            } while (actual != cabeza);
             
             return false;
         }
-
+        
         public bool Remove(T item)
         {
-            if (cabeza == null)
-            {
-                return false;
-            }
-
-            Nodo<T> aux = cabeza;
+            if (cabeza == null) return false;
+            
+            Nodo<T> actual = cabeza;
             do
             {
-                if (aux.dato.Equals(item))
+                if (actual.dato.Equals(item))
                 {
                     if (contador == 1)
                     {
@@ -85,47 +76,53 @@ namespace DatosProyectoI.EstructuraDatos
                     }
                     else
                     {
-                        aux.anterior.siguiente = aux.siguiente;
-                        aux.siguiente.anterior = aux.anterior;
-
-                        if (aux == cabeza)
-                        {
-                            cabeza = aux.siguiente;
-                        }
-
-                        contador--;
-                        return true;
+                        actual.anterior.siguiente = actual.siguiente;
+                        actual.siguiente.anterior = actual.anterior;
+                        if (actual == cabeza)
+                            cabeza = actual.siguiente;
                     }
+                    contador--;
+                    return true;
                 }
-                aux = aux.siguiente;
-            } while (aux != cabeza);
-
+                actual = actual.siguiente;
+            } while (actual != cabeza);
+            
             return false;
         }
-
-        IEnumerator IEnumerable.GetEnumerator()
+        
+        public void CopyTo(T[] array, int arrayIndex)
         {
-            return GetEnumerator();
+            if (array == null) throw new ArgumentNullException(nameof(array));
+            if (arrayIndex < 0) throw new ArgumentOutOfRangeException(nameof(arrayIndex));
+            if (array.Length - arrayIndex < contador) throw new ArgumentException("Array no tiene suficiente espacio");
+            
+            if (cabeza == null) return;
+            
+            Nodo<T> actual = cabeza;
+            int index = arrayIndex;
+            do
+            {
+                array[index] = actual.dato;
+                actual = actual.siguiente;
+                index++;
+            } while (actual != cabeza);
         }
-
-        public void CopyTo(T[] artray, int arrayIndex)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public IEnumerator<T> GetEnumerator()
         {
-            if (cabeza == null)
-            {
-                yield break;
-            }
-
+            if (cabeza == null) yield break;
+            
             Nodo<T> actual = cabeza;
             do
             {
                 yield return actual.dato;
                 actual = actual.siguiente;
             } while (actual != cabeza);
+        }
+        
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
     }

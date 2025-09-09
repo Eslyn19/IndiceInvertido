@@ -1,51 +1,28 @@
-using DatosProyectoI.EstructuraDatos;
+using System.Text;
 
 namespace DatosProyectoI.Model
 {
-    internal class Termino
+    public class Termino
     {
-        public string palabra { get; set; }
-        public int frecuencia { get; set; } 
-        public int DocumentosCont { get; set; } // contenedor documentos
-        public ListaCircular<Documento> Documentos { get; set; } // lista de documentos
-        public double IDF { get; set; } // indice de rareza
-
-        public Termino(string _palabra)
+        public string palabra { get; set; }        // Termino
+        public int frecuenciaDocs { get; set; }    // frecuencia de documentos
+        public double IDF { get; set; }            // Indice de rareza por termino
+        public string DocsFrecuencia { get; set; } // Documentos en frecuencia
+        
+        public Termino()
         {
-            palabra =_palabra;
-            frecuencia = 0;
-            DocumentosCont = 0;
-            Documentos = new ListaCircular<Documento>();
+            palabra = "";
+            frecuenciaDocs = 0;
             IDF = 0.0;
+            DocsFrecuencia = "";
         }
-
-        // Agregar documento a la lista circular de documentos
-        public void AgregarDoc(Documento doc, int _frecuencia)
+        
+        public Termino(string p, int df, double idf, string d)
         {
-            if (!Documentos.Contains(doc))
-            {
-                Documentos.Add(doc);
-                DocumentosCont++;
-            }
-            frecuencia += _frecuencia;
-        }
-
-        public void CalcularIDF(int N)
-        {
-            if (DocumentosCont > 0)
-            {
-                IDF = Math.Log10((double)N / DocumentosCont);
-            }
-        }
-
-        public double CalcularTFIDF(Documento doc)
-        {
-            int tf = doc.getFrecuenciaTerm(palabra);
-            if (tf > 0)
-            {
-                return tf * IDF;
-            }
-            return 0.0;
+            palabra = p;
+            frecuenciaDocs = df;
+            IDF = idf;
+            DocsFrecuencia = d;
         }
     }
 }

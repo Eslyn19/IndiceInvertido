@@ -1,47 +1,28 @@
-﻿namespace DatosProyectoI.Model
+using System.Text;
+
+namespace DatosProyectoI.Model
 {
-    internal class Documento
+    public class Documento
     {
-        public string nombre { get; set; }
-        public string contenido { get; set; }
-        public string[] Tokens { get; set; }
-        public int TotTerminos { get; set; }
-
-        public Documento(string n, string c)
+        public string nombre { get; set; }   // Nombre del documento
+        public string URL { get; set; }      // URL del documento (ruta)
+        public int terminos { get; set; }    // Total de terminos por documento
+        public double[] arrIDF { get; set; } // Arreglo para el indice de rareza
+        
+        public Documento()
         {
-            nombre = n;
-            contenido = c;
-            Tokens = new string[0];
-            TotTerminos = 0;
+            nombre = "";
+            URL = "";
+            terminos = 0;
+            arrIDF = new double[0];
         }
-
-        // Preprocesamiento de los archivos de texto
-        public void ProcesarDoc(string[] stopwords)
+        
+        public Documento(string n, string url, int t, double[] arr)
         {
-            // Tokenizacion
-            string[] palabras = contenido.ToLower().Split(new char[] { ' ', '.', ',', ';', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            
-            // eliminar stopwords
-            Tokens = palabras
-                .Select(palabra => palabra.Trim())
-                .Where(palabra => !stopwords.Contains(palabra))
-                .ToArray();
-
-            TotTerminos = Tokens.Length;
-        }
-
-        // Obtener frecuencia de los terminos
-        public int getFrecuenciaTerm(string termino)
-        {
-            int frecuencia = 0;
-            foreach (string token in Tokens)
-            {
-                if (token.Equals(termino, StringComparison.OrdinalIgnoreCase))
-                {
-                    frecuencia++;
-                }
-            }
-            return frecuencia;
+            this.nombre = n;
+            URL = url;
+            terminos = t;
+            arrIDF = arr;
         }
     }
 }

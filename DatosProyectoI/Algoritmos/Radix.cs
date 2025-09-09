@@ -4,45 +4,45 @@ namespace DatosProyectoI.Algoritmos
 {
     internal class OrdenamientoRadix
     {
-        public static void RadixSort(Termino[] terminos)
+        public static void RadixSortPorFrecuenciaDocs(Termino[] terminos)
         {
             if (terminos == null || terminos.Length <= 1)
             {
-                return; // si es vacio
+                return;
             }
 
-            int mx = GetMax(terminos);
+            int maxFrecuencia = GetMaxFrecuencia(terminos);
 
-            // Aplicar ordenamiento radix
-            for (int exp = 1; mx / exp > 0; exp *= 10)
+            // Aplicar ordenamiento radix por cada dígito
+            for (int exp = 1; maxFrecuencia / exp > 0; exp *= 10)
             {
                 CountSort(terminos, exp);
             }
 
-            // Invertir orden en ascendente
+            // Invertir para obtener orden descendente (mayor a menor frecuencia)
             Array.Reverse(terminos);
         }
 
-        private static int GetMax(Termino[] terminos)
+        private static int GetMaxFrecuencia(Termino[] terminos)
         {
-            int mx = terminos[0].frecuencia;
+            int max = terminos[0].frecuenciaDocs;
             for (int i = 1; i < terminos.Length; i++)
             {
-                if (terminos[i].frecuencia > mx)
-                    mx = terminos[i].frecuencia;
+                if (terminos[i].frecuenciaDocs > max)
+                    max = terminos[i].frecuenciaDocs;
             }
-            return mx;
+            return max;
         }
 
         private static void CountSort(Termino[] terminos, int exp)
         {
-            int[] conteo = new int[10]; // Digitos posibles 0-9
+            int[] conteo = new int[10]; // Dígitos posibles 0-9
             Termino[] resultado = new Termino[terminos.Length];
 
             // Contar la frecuencia de cada digito
-            foreach (var t in terminos)
+            for (int i = 0; i < terminos.Length; i++)
             {
-                int digito = (t.frecuencia / exp) % 10;
+                int digito = (terminos[i].frecuenciaDocs / exp) % 10;
                 conteo[digito]++;
             }
 
@@ -55,17 +55,16 @@ namespace DatosProyectoI.Algoritmos
             // Construir resultado
             for (int i = terminos.Length - 1; i >= 0; i--)
             {
-                int digito = (terminos[i].frecuencia / exp) % 10;
+                int digito = (terminos[i].frecuenciaDocs / exp) % 10;
                 resultado[conteo[digito] - 1] = terminos[i];
                 conteo[digito]--;
             }
-    
-            // Pasa los elementos ordenados a el arreglo original
+
+            // Copiar los elementos ordenados al array original
             for (int i = 0; i < terminos.Length; i++)
             {
                 terminos[i] = resultado[i];
             }
         }
-
     }
 }
