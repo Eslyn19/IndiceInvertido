@@ -4,12 +4,12 @@ namespace DatosProyectoI.Model
 {
     public class IndicePreprocesado
     {
-        public int totalDocs { get; set; }          // Total de documentos preprocesados
-        public int totalTerms { get; set; }         // Total de terminos unicos en documento 
-        public double porcZipf { get; set; }        // Porcentaje de zifp a aplicar
-        public string[] terminos { get; set; }      // Arreglo de terminos
-        public Termino[] terminosDet { get; set; }  // Arreglo informatico detallado de terminos
-        public Documento[] documentos { get; set; } // Documentos procesados
+        public int totalDocs { get; set; }              // Total de documentos preprocesados
+        public int totalTerms { get; set; }             // Total de terminos unicos en documento 
+        public double porcZipf { get; set; }            // Porcentaje de zifp a aplicar
+        public string[] terminos { get; set; }          // Arreglo de terminos
+        public Termino[] terminosDet { get; set; }      // Arreglo informatico detallado de terminos
+        public Documento[] documentos { get; set; }     // Documentos procesados
         
         public IndicePreprocesado()
         {

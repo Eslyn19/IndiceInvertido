@@ -6,7 +6,7 @@ namespace DatosProyectoI.Model
     {
         public string palabra { get; set; }        // Termino
         public int frecuenciaDocs { get; set; }    // frecuencia de documentos
-        public double IDF { get; set; }            // Indice de rareza por termino
+        public double IDF { get; set; }            // Indice de rareza
         public string DocsFrecuencia { get; set; } // Documentos en frecuencia
         
         public Termino()

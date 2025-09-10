@@ -7,11 +7,11 @@ namespace DatosProyectoI.UI
 {
     internal class App
     {
-        private Builder procesador;
+        private Builder builder;
         
         public App()
         {
-            procesador = Builder.getInstance();
+            builder = Builder.getInstance();
         }
         
         public void IniciarAplicacion() 
@@ -66,24 +66,23 @@ namespace DatosProyectoI.UI
             Console.WriteLine("=== PROCESAR DOCUMENTOS ===");
             Console.WriteLine();
             
-            // Ruta fija
             string rutaDocs = "../../../../Documentos";
             Console.WriteLine($"Ruta de documentos: {rutaDocs}");
             
             Console.WriteLine();
-            Console.Write("Ingrese el porcentaje de reducción con la ley de Zipf (0-90): ");
+            Console.Write("Ingrese el porcentaje de reducción con la ley de Zipf (0-40): ");
             string porcentajeStr = Console.ReadLine();
             
-            if (!double.TryParse(porcentajeStr, out double porcentaje) || porcentaje < 0 || porcentaje > 90)
+            if (!double.TryParse(porcentajeStr, out double porcentaje) || porcentaje < 0 || porcentaje > 40)
             {
-                Console.WriteLine("Porcentaje inválido. Usando 20% por defecto.");
+                Console.WriteLine("Porcentaje invalido. Usando 20% por defecto.");
                 porcentaje = 20.0;
             }
             
             Console.WriteLine();
             Console.WriteLine("Procesando documentos...");
             
-            procesador.ProcesarDocumentos(rutaDocs, porcentaje);
+            builder.ProcesarDocumentos(rutaDocs, porcentaje);
             
             Console.WriteLine();
             Console.WriteLine("Presione Enter para continuar...");
@@ -97,7 +96,7 @@ namespace DatosProyectoI.UI
             Console.WriteLine();
             
             Console.WriteLine("Cargando índice preprocesado...");
-            procesador.CargarIndicePreprocesado();
+            builder.CargarIndicePreprocesado();
             
             Console.WriteLine();
             Console.WriteLine("Presione Enter para continuar...");
@@ -113,23 +112,7 @@ namespace DatosProyectoI.UI
             Console.Write("Ingrese su consulta: ");
             string consulta = Console.ReadLine();
             
-            if (string.IsNullOrWhiteSpace(consulta))
-            {
-                Console.WriteLine("Consulta vacía.");
-                Console.WriteLine("Presione Enter para continuar...");
-                Console.ReadLine();
-                return;
-            }
-            
-            Console.WriteLine();
-            Console.WriteLine("Procesando consulta...");
-            Console.WriteLine();
-            
-            procesador.Consultar(consulta);
-            
-            Console.WriteLine();
-            Console.WriteLine("Presione Enter para continuar...");
-            Console.ReadLine();
+            builder.Consultar(consulta);
         }
         
     }

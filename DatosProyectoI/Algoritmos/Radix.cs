@@ -4,16 +4,10 @@ namespace DatosProyectoI.Algoritmos
 {
     internal class OrdenamientoRadix
     {
-        public static void RadixSortPorFrecuenciaDocs(Termino[] terminos)
+        public static void RadixSort(Termino[] terminos)
         {
-            if (terminos == null || terminos.Length <= 1)
-            {
-                return;
-            }
+            int maxFrecuencia = GetMax(terminos);
 
-            int maxFrecuencia = GetMaxFrecuencia(terminos);
-
-            // Aplicar ordenamiento radix por cada dígito
             for (int exp = 1; maxFrecuencia / exp > 0; exp *= 10)
             {
                 CountSort(terminos, exp);
@@ -23,20 +17,20 @@ namespace DatosProyectoI.Algoritmos
             Array.Reverse(terminos);
         }
 
-        private static int GetMaxFrecuencia(Termino[] terminos)
+        private static int GetMax(Termino[] terminos)
         {
-            int max = terminos[0].frecuenciaDocs;
+            int mx = terminos[0].frecuenciaDocs;
             for (int i = 1; i < terminos.Length; i++)
             {
-                if (terminos[i].frecuenciaDocs > max)
-                    max = terminos[i].frecuenciaDocs;
+                if (terminos[i].frecuenciaDocs > mx)
+                    mx = terminos[i].frecuenciaDocs;
             }
-            return max;
+            return mx;
         }
 
         private static void CountSort(Termino[] terminos, int exp)
         {
-            int[] conteo = new int[10]; // Dígitos posibles 0-9
+            int[] conteo = new int[10]; // Digitos posibles 0-9
             Termino[] resultado = new Termino[terminos.Length];
 
             // Contar la frecuencia de cada digito

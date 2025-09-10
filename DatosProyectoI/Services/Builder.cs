@@ -20,6 +20,7 @@ namespace DatosProyectoI.Services
             indiceActual = new IndicePreprocesado();
         }
         
+        // Patron singleton
         public static Builder getInstance()
         {
             if (instance == null)
@@ -46,16 +47,22 @@ namespace DatosProyectoI.Services
                 }
                 else
                 {
-                    stopwords = Array.Empty<string>();
+                    stopwords = new string[0];
                 }
+                
             } catch(Exception ex) {
-                stopwords = Array.Empty<string>();
                 Console.WriteLine(ex);
+                stopwords = new string[0];
             }
         }
         
         private bool EsStopword(string token)
         {
+            if (stopwords == null || stopwords.Length == 0)
+            {
+                return false;
+            }
+            
             for (int i = 0; i < stopwords.Length; i++)
             {
                 if (stopwords[i] == token)
@@ -66,177 +73,32 @@ namespace DatosProyectoI.Services
             return false;
         }
         
-        /// <summary>
-        /// Carga archivos TXT desde una carpeta y los convierte en un array de DocumentoOriginal
-        /// </summary>
-        /// <param name="rutaCarpeta">Ruta de la carpeta que contiene los archivos TXT</param>
-        /// <returns>Array de DocumentoOriginal con el contenido de los archivos</returns>
-        public DocumentoOriginal[] CargarArchivosTxt(string rutaCarpeta)
+        public void ProcesarDocumentos(string ruta, double zipf)
         {
             try
             {
-                string rutaCompleta = Path.GetFullPath(rutaCarpeta);
+                var documentos = CargarTokenizador(ruta);
+
+                var indiceInvertido = CrearIndiceInvertido(documentos);
+
+                var calculoTF_IDF = CalculoTF_IDF(indiceInvertido, documentos.Length);
+
+                var leyZipf = AplicarLeyZipf(calculoTF_IDF, zipf);
                 
-                if (!Directory.Exists(rutaCompleta))
-                {
-                    Console.WriteLine($"Error: La carpeta '{rutaCompleta}' no existe.");
-                    return new DocumentoOriginal[0];
-                }
+                var docsPreprocesados = CalcularVectoresTFIDF(documentos, leyZipf);
                 
-                string[] archivos = Directory.GetFiles(rutaCompleta, "*.txt");
-                
-                if (archivos.Length == 0)
-                {
-                    Console.WriteLine($"No se encontraron archivos TXT en la carpeta '{rutaCompleta}'.");
-                    return new DocumentoOriginal[0];
-                }
-                
-                var documentos = new DocumentoOriginal[archivos.Length];
-                int documentosCargados = 0;
-                
-                for (int i = 0; i < archivos.Length; i++)
-                {
-                    try
-                    {
-                        string archivo = archivos[i];
-                        string nombre = Path.GetFileName(archivo);
-                        string contenido = File.ReadAllText(archivo, Encoding.UTF8);
-                        string url = Decodificador.DecodificarArchivo(nombre);
-                        
-                        // Tokenización y filtrado de stopwords
-                        string[] tokens = TokenizarYFiltrar(contenido);
-                        
-                        documentos[i] = new DocumentoOriginal(nombre, url, contenido, tokens);
-                        documentosCargados++;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error procesando archivo {archivos[i]}: {ex.Message}");
-                        documentos[i] = new DocumentoOriginal("", "", "", new string[0]);
-                    }
-                }
-                
-                Console.WriteLine($"Carga completada: {documentosCargados} documentos procesados exitosamente");
-                return documentos;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error general al cargar archivos TXT: {ex.Message}");
-                return new DocumentoOriginal[0];
-            }
-        }
-        
-        /// <summary>
-        /// Muestra información básica sobre los documentos cargados
-        /// </summary>
-        /// <param name="documentos">Array de documentos a analizar</param>
-        public void MostrarInfoDocumentos(DocumentoOriginal[] documentos)
-        {
-            if (documentos == null || documentos.Length == 0)
-            {
-                Console.WriteLine("No hay documentos cargados.");
-                return;
-            }
-            
-            Console.WriteLine($"\n=== INFORMACIÓN DE DOCUMENTOS ===");
-            Console.WriteLine($"Total de documentos: {documentos.Length}");
-            
-            int totalTokens = 0;
-            int documentosConContenido = 0;
-            string[] terminosUnicos = new string[10000]; // Array fijo para términos únicos
-            int terminosUnicosCount = 0;
-            
-            foreach (var doc in documentos)
-            {
-                if (doc.Tokens.Length > 0)
-                {
-                    documentosConContenido++;
-                    totalTokens += doc.Tokens.Length;
-                    
-                    foreach (string token in doc.Tokens)
-                    {
-                        // Verificar si el término ya existe
-                        bool existe = false;
-                        for (int i = 0; i < terminosUnicosCount; i++)
-                        {
-                            if (terminosUnicos[i] == token)
-                            {
-                                existe = true;
-                                break;
-                            }
-                        }
-                        
-                        if (!existe && terminosUnicosCount < terminosUnicos.Length)
-                        {
-                            terminosUnicos[terminosUnicosCount] = token;
-                            terminosUnicosCount++;
-                        }
-                    }
-                }
-            }
-            
-            Console.WriteLine($"Documentos con contenido: {documentosConContenido}");
-            Console.WriteLine($"Total de tokens: {totalTokens:N0}");
-            Console.WriteLine($"Términos únicos: {terminosUnicosCount:N0}");
-            Console.WriteLine($"Promedio de tokens por documento: {(documentosConContenido > 0 ? totalTokens / documentosConContenido : 0):F1}");
-            
-            // Mostrar algunos ejemplos de documentos
-            Console.WriteLine($"\n=== EJEMPLOS DE DOCUMENTOS ===");
-            int ejemplosMostrados = 0;
-            for (int i = 0; i < documentos.Length && ejemplosMostrados < 5; i++)
-            {
-                if (documentos[i].Tokens.Length > 0)
-                {
-                    Console.WriteLine($"D{i + 1}: {documentos[i].URL}");
-                    Console.WriteLine($"   Tokens: {documentos[i].Tokens.Length}");
-                    Console.WriteLine($"   Primeros tokens: {string.Join(", ", documentos[i].Tokens.Take(10))}");
-                    ejemplosMostrados++;
-                }
-            }
-        }
-        
-        public void ProcesarDocumentos(string rutaCarpeta, double porcentajeZipf)
-        {
-            try
-            {
-                // 1. Cargar y tokenizar documentos
-                var documentosOriginales = CargarYTokenizarDocumentos(rutaCarpeta);
-                if (documentosOriginales.Length == 0)
-                {
-                    Console.WriteLine("No se encontraron documentos para procesar.");
-                    return;
-                }
-                
-                // 2. Crear índice invertido básico
-                var indiceInvertido = CrearIndiceInvertido(documentosOriginales);
-                
-                // 3. Calcular TF, DF, IDF
-                var terminosConEstadisticas = CalcularEstadisticasTerminos(indiceInvertido, documentosOriginales.Length);
-                
-                // 4. Aplicar ley de Zipf
-                var terminosFiltrados = AplicarLeyZipf(terminosConEstadisticas, porcentajeZipf);
-                
-                // 5. Calcular vectores TF-IDF para cada documento
-                var documentosPreprocesados = CalcularVectoresTFIDF(documentosOriginales, terminosFiltrados);
-                
-                // 6. Crear índice preprocesado final
+                // Crear indice preprocesado
                 indiceActual = new IndicePreprocesado(
-                    documentosOriginales.Length,
-                    terminosFiltrados.Length,
-                    porcentajeZipf,
-                    terminosFiltrados.Select(t => t.palabra).ToArray(),
-                    terminosFiltrados,
-                    documentosPreprocesados
+                    documentos.Length,
+                    leyZipf.Length,
+                    zipf,
+                    leyZipf.Select(t => t.palabra).ToArray(),
+                    leyZipf,
+                    docsPreprocesados
                 );
                 
-                // 7. Guardar en archivo
+                // Guardar en archivo
                 GuardarIndicePreprocesado();
-                
-                Console.WriteLine($"Procesamiento completado:");
-                Console.WriteLine($"- Documentos procesados: {documentosOriginales.Length}");
-                Console.WriteLine($"- Términos originales: {terminosConEstadisticas.Length}");
-                Console.WriteLine($"- Términos después de Zipf: {terminosFiltrados.Length}");
-                Console.WriteLine($"- Archivo guardado: indicePreprocesado.json");
             }
             catch (Exception ex)
             {
@@ -244,14 +106,14 @@ namespace DatosProyectoI.Services
             }
         }
         
-        private DocumentoOriginal[] CargarYTokenizarDocumentos(string rutaCarpeta)
+        private ActualDoc[] CargarTokenizador(string rutaCarpeta)
         {
-            var documentos = new List<DocumentoOriginal>();
+            var documentos = new List<ActualDoc>();
             string rutaCompleta = Path.GetFullPath(rutaCarpeta);
             
             if (!Directory.Exists(rutaCompleta))
             {
-                return new DocumentoOriginal[0];
+                return new ActualDoc[0];
             }
             
             string[] archivos = Directory.GetFiles(rutaCompleta, "*.txt");
@@ -265,9 +127,9 @@ namespace DatosProyectoI.Services
                     string url = Decodificador.DecodificarArchivo(nombre);
                     
                     // Tokenización y filtrado de stopwords
-                    string[] tokens = TokenizarYFiltrar(contenido);
+                    string[] tokens = Tokenizador(contenido);
                     
-                    documentos.Add(new DocumentoOriginal(nombre, url, contenido, tokens));
+                    documentos.Add(new ActualDoc(nombre, url, contenido, tokens));
                 }
                 catch (Exception ex)
                 {
@@ -278,45 +140,43 @@ namespace DatosProyectoI.Services
             return documentos.ToArray();
         }
         
-        private string[] TokenizarYFiltrar(string texto)
+        private string[] Tokenizador(string texto)
         {
-            // Normalizar texto: minúsculas, remover caracteres especiales
-            string textoNormalizado = Regex.Replace(texto.ToLower(), @"[^\w\s]", " ");
+            string normalizar = Regex.Replace(texto.ToLower(), @"[^\w\s]", " ");
             
             // Dividir en tokens
-            string[] tokens = textoNormalizado.Split(new char[] { ' ', '\t', '\n', '\r' }, 
+            string[] tokens = normalizar.Split(new char[] { ' ', '\n' }, 
                 StringSplitOptions.RemoveEmptyEntries);
             
-            // Filtrar stopwords y tokens muy cortos
-            string[] tokensFiltrados = new string[tokens.Length]; // Array del mismo tamaño
-            int tokensFiltradosCount = 0;
+            string[] tokensFiltrados = new string[tokens.Length];
+            int cont = 0; // cantidad tokens filtrados
             
             foreach (string token in tokens)
             {
                 if (token.Length > 2 && !EsStopword(token))
                 {
-                    tokensFiltrados[tokensFiltradosCount] = token;
-                    tokensFiltradosCount++;
+                    tokensFiltrados[cont] = token;
+                    cont++;
                 }
             }
             
-            // Crear array del tamaño exacto
-            string[] resultado = new string[tokensFiltradosCount];
-            for (int i = 0; i < tokensFiltradosCount; i++)
+       
+            string[] result = new string[cont];
+            for (int i = 0; i < cont; i++)
             {
-                resultado[i] = tokensFiltrados[i];
+                result[i] = tokensFiltrados[i];
             }
             
-            return resultado;
+            return result;
         }
         
-        private IndiceInvertidoBasico CrearIndiceInvertido(DocumentoOriginal[] documentos)
+        private IndiceInvertido CrearIndiceInvertido(ActualDoc[] documentos)
         {
-            var indice = new IndiceInvertidoBasico();
+            var indice = new IndiceInvertido();
             
-            for (int docId = 0; docId < documentos.Length; docId++)
+            for (int k = 0; k < documentos.Length; k++)
             {
-                var documento = documentos[docId];
+                var documento = documentos[k];
                 
                 // Contar frecuencias de términos en este documento usando arrays
                 string[] terminosUnicos = new string[documento.Tokens.Length];
@@ -351,80 +211,74 @@ namespace DatosProyectoI.Services
                 // Agregar al índice invertido
                 for (int i = 0; i < terminosCount; i++)
                 {
-                    indice.AgregarTermino(terminosUnicos[i], docId, frecuencias[i]);
+                    indice.AgregarTermino(terminosUnicos[i], k, frecuencias[i]);
                 }
             }
             
             return indice;
         }
         
-        private Termino[] CalcularEstadisticasTerminos(IndiceInvertidoBasico indice, int totalDocumentos)
+        private Termino[] CalculoTF_IDF(IndiceInvertido index, int N)
         {
-            Termino[] terminos = new Termino[indice.TerminosCount];
+            Termino[] terminos = new Termino[index.terminosCont];
             
-            for (int i = 0; i < indice.TerminosCount; i++)
+            for (int i = 0; i < index.terminosCont; i++)
             {
-                string palabra = indice.Terminos[i];
-                var documentos = indice.ObtenerDocumentos(palabra);
+                string palabra = index.Terminos[i];
+                var documentos = index.ObtenerDocumentos(palabra);
                 
-                // Calcular Document Frequency (DF)
+                // Calcular df
                 int df = documentos.Length;
                 
                 // Calcular IDF
-                double idf = Math.Log10((double)totalDocumentos / df);
+                double idf = Math.Log10((double)N / df);
                 
-                // Crear string de documentos con frecuencias usando array
+                // Crear string de documentos con frecuencias
                 string[] docStrings = new string[documentos.Length];
                 for (int j = 0; j < documentos.Length; j++)
                 {
                     docStrings[j] = $"D{documentos[j].DocId + 1}:{documentos[j].Frecuencia}";
                 }
                 
-                // Unir strings manualmente
-                string docStringFinal = "";
+                string frecuencia = "";
                 for (int k = 0; k < docStrings.Length; k++)
                 {
-                    if (k > 0) docStringFinal += ",";
-                    docStringFinal += docStrings[k];
+                    if (k > 0) frecuencia += ",";
+                    frecuencia += docStrings[k];
                 }
-                
-                terminos[i] = new Termino(
-                    palabra,
-                    df,
-                    idf,
-                    docStringFinal
-                );
+
+                terminos[i] = new Termino(palabra, df, idf, frecuencia);
             }
             
             return terminos;
         }
         
-        private Termino[] AplicarLeyZipf(Termino[] terminos, double porcentajeReduccion)
+        private Termino[] AplicarLeyZipf(Termino[] terminos, double porc)
         {
             // Crear copia del array para ordenar
-            Termino[] terminosOrdenados = new Termino[terminos.Length];
+            Termino[] ordenados = new Termino[terminos.Length];
             for (int i = 0; i < terminos.Length; i++)
             {
-                terminosOrdenados[i] = terminos[i];
+                ordenados[i] = terminos[i];
             }
             
-            OrdenamientoRadix.RadixSortPorFrecuenciaDocs(terminosOrdenados);
+            OrdenamientoRadix.RadixSort(ordenados);
             
-            // Calcular cuántos términos mantener
-            int totalTerminos = terminosOrdenados.Length;
-            int terminosAMantener = (int)Math.Ceiling(totalTerminos * (1.0 - porcentajeReduccion / 100.0));
+            // Calcular cuantos terminos dejarse
+            int Total = ordenados.Length;
+            int terminosMantenidos = (int)Math.Ceiling(Total  * (1.0 - porc / 100.0));
             
-            // Crear array con los términos a mantener
-            Termino[] resultado = new Termino[terminosAMantener];
-            for (int i = 0; i < terminosAMantener; i++)
+            // Arreglo de terminos mantenidos
+            Termino[] res = new Termino[terminosMantenidos];
+            for (int i = 0; i < terminosMantenidos; i++)
             {
-                resultado[i] = terminosOrdenados[i];
+                res[i] = ordenados[i];
             }
             
-            return resultado;
+            return res;
         }
         
-        private Documento[] CalcularVectoresTFIDF(DocumentoOriginal[] documentos, Termino[] terminos)
+        private Documento[] CalcularVectoresTFIDF(ActualDoc[] documentos, Termino[] terminos)
         {
             var documentosPreprocesados = new Documento[documentos.Length];
             
@@ -433,16 +287,16 @@ namespace DatosProyectoI.Services
                 var documento = documentos[docId];
                 var vector = new double[terminos.Length];
                 
-                // Contar frecuencias en este documento usando arrays
+                // Contar frecuencias por documento
                 string[] terminosUnicos = new string[documento.Tokens.Length];
                 int[] frecuencias = new int[documento.Tokens.Length];
-                int terminosCount = 0;
+                int cont = 0;
                 
                 foreach (string token in documento.Tokens)
                 {
                     // Buscar si el término ya existe
                     int indiceTermino = -1;
-                    for (int i = 0; i < terminosCount; i++)
+                    for (int i = 0; i < cont; i++)
                     {
                         if (terminosUnicos[i] == token)
                         {
@@ -457,9 +311,9 @@ namespace DatosProyectoI.Services
                     }
                     else
                     {
-                        terminosUnicos[terminosCount] = token;
-                        frecuencias[terminosCount] = 1;
-                        terminosCount++;
+                        terminosUnicos[cont] = token;
+                        frecuencias[cont] = 1;
+                        cont++;
                     }
                 }
                 
@@ -470,7 +324,7 @@ namespace DatosProyectoI.Services
                     
                     // Buscar frecuencia del término en este documento
                     int tf = 0;
-                    for (int i = 0; i < terminosCount; i++)
+                    for (int i = 0; i < cont; i++)
                     {
                         if (terminosUnicos[i] == termino.palabra)
                         {
@@ -515,14 +369,10 @@ namespace DatosProyectoI.Services
                 
                 string json = JsonSerializer.Serialize(indiceActual, opciones);
                 File.WriteAllText(rutaArchivo, json, Encoding.UTF8);
-                
-                string rutaCompleta = Path.GetFullPath(rutaArchivo);
-                Console.WriteLine($"Ubicación: {rutaCompleta}");
-                Console.WriteLine($"Tamaño del archivo: {new FileInfo(rutaCompleta).Length / 1024.0:F1} KB");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al guardar el índice: {ex.Message}");
+                Console.WriteLine($"Error al guardar indice, {ex.Message}");
             }
         }
         
@@ -534,14 +384,12 @@ namespace DatosProyectoI.Services
                 
                 if (!File.Exists(rutaArchivo))
                 {
-                    Console.WriteLine($"El archivo {rutaArchivo} no existe. Primero debe procesar los documentos.");
+                    Console.WriteLine($"El archivo {rutaArchivo} no existe");
                     return;
                 }
                 
                 string json = File.ReadAllText(rutaArchivo, Encoding.UTF8);
                 indiceActual = JsonSerializer.Deserialize<IndicePreprocesado>(json);
-                
-                Console.WriteLine($"Archivo {rutaArchivo} cargado correctamente");
             }
             catch (Exception ex)
             {
@@ -552,8 +400,7 @@ namespace DatosProyectoI.Services
         public void Consultar(string consulta)
         {
             // Tokenizar consulta
-            string[] tokensConsulta = TokenizarYFiltrar(consulta);
-            
+            string[] tokensConsulta = Tokenizador(consulta);
             
             // Crear vector de consulta
             var vectorConsulta = new double[indiceActual.totalTerms];
@@ -564,7 +411,6 @@ namespace DatosProyectoI.Services
                 
                 if (tokensConsulta.Contains(termino))
                 {
-                    // TF-IDF de la consulta (asumiendo frecuencia 1 para cada término)
                     vectorConsulta[i] = indiceActual.terminosDet[i].IDF;
                 }
                 else
@@ -573,14 +419,14 @@ namespace DatosProyectoI.Services
                 }
             }
             
-            // Calcular similitud coseno con cada documento usando arrays
+            // Calcular similitud coseno con cada documento
             int[] docIds = new int[indiceActual.totalDocs];
             double[] similitudes = new double[indiceActual.totalDocs];
             int resultadosCount = 0;
             
             for (int docId = 0; docId < indiceActual.totalDocs; docId++)
             {
-                double similitud = CalcularSimilitudCoseno(vectorConsulta, indiceActual.documentos[docId].arrIDF);
+                double similitud = CalcularCoseno(vectorConsulta, indiceActual.documentos[docId].arrIDF);
                 if (similitud > 0)
                 {
                     docIds[resultadosCount] = docId;
@@ -590,28 +436,9 @@ namespace DatosProyectoI.Services
             }
             
             // Ordenar por similitud descendente usando Bubble Sort
-            for (int i = 0; i < resultadosCount - 1; i++)
-            {
-                for (int j = 0; j < resultadosCount - i - 1; j++)
-                {
-                    if (similitudes[j] < similitudes[j + 1])
-                    {
-                        // Intercambiar similitudes
-                        double tempSim = similitudes[j];
-                        similitudes[j] = similitudes[j + 1];
-                        similitudes[j + 1] = tempSim;
-                        
-                        // Intercambiar docIds
-                        int tempDoc = docIds[j];
-                        docIds[j] = docIds[j + 1];
-                        docIds[j + 1] = tempDoc;
-                    }
-                }
-            }
+            OrdenamientoBorbuja(similitudes, docIds, resultadosCount);
             
-            // Mostrar resultados
             Console.WriteLine($"\nConsulta: '{consulta}'");
-            // Encontrar términos que están en el índice
             string[] terminosEncontrados = new string[tokensConsulta.Length];
             int terminosEncontradosCount = 0;
             
@@ -638,7 +465,7 @@ namespace DatosProyectoI.Services
             }
             
             Console.WriteLine($"Términos encontrados: {terminosStr}");
-            Console.WriteLine($"\nResultados (top 10):");
+            Console.WriteLine($"\nTop 10: ");
             Console.WriteLine("Documento\tSimilitud\tURL");
             
             for (int i = 0; i < Math.Min(10, resultadosCount); i++)
@@ -648,28 +475,54 @@ namespace DatosProyectoI.Services
                 var documento = indiceActual.documentos[docId];
                 Console.WriteLine($"D{docId + 1}\t\t{similitud:F3}\t\t{documento.URL}");
             }
+            Console.ReadKey();
         }
-        
-        private double CalcularSimilitudCoseno(double[] vector1, double[] vector2)
+
+        private void OrdenamientoBorbuja(double[] similitudes, int[] docIds, int count)
         {
-            if (vector1.Length != vector2.Length)
-                return 0.0;
-            
-            double productoPunto = 0.0;
-            double magnitud1 = 0.0;
-            double magnitud2 = 0.0;
-            
-            for (int i = 0; i < vector1.Length; i++)
+            for (int i = 0; i < count - 1; i++)
             {
-                productoPunto += vector1[i] * vector2[i];
-                magnitud1 += vector1[i] * vector1[i];
-                magnitud2 += vector2[i] * vector2[i];
+                for (int j = 0; j < count - i - 1; j++)
+                {
+                    if (similitudes[j] < similitudes[j + 1])
+                    {
+                        // Intercambiar similitudes
+                        double tempSim = similitudes[j];
+                        similitudes[j] = similitudes[j + 1];
+                        similitudes[j + 1] = tempSim;
+                        
+                        // Intercambiar docIds
+                        int tempDoc = docIds[j];
+                        docIds[j] = docIds[j + 1];
+                        docIds[j + 1] = tempDoc;
+                    }
+                }
+            }
+        }
+
+        private double CalcularCoseno(double[] arr, double[] arr2)
+        {
+            if (arr.Length != arr2.Length) { 
+                return 0.0;
             }
             
-            if (magnitud1 == 0.0 || magnitud2 == 0.0)
-                return 0.0;
+            double productoPunto = 0.0;
+            double magnitud = 0.0; 
+            double magnitud2 = 0.0;
             
-            return productoPunto / (Math.Sqrt(magnitud1) * Math.Sqrt(magnitud2));
+            for (int i = 0; i < arr.Length; i++)
+            {
+                productoPunto += arr[i] * arr2[i];
+                magnitud += arr[i] * arr[i];
+                magnitud2 += arr2[i] * arr2[i];
+            }
+
+            if (magnitud == 0.0 || magnitud2 == 0.0)
+            {
+                return 0.0;
+            }
+            
+            return productoPunto / (Math.Sqrt(magnitud) * Math.Sqrt(magnitud2));
         }
     }
     
