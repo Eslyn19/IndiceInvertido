@@ -5,7 +5,7 @@ namespace DatosProyectoI.EstructuraDatos
 {
     internal class ListaCircular<T> : ICollection<T>
     {
-        private Nodo<T> cabeza;
+        internal Nodo<T> cabeza;
         
         private int contador;
         
@@ -48,48 +48,14 @@ namespace DatosProyectoI.EstructuraDatos
         
         public bool Contains(T item)
         {
-            if (cabeza == null) return false;
-            
-            Nodo<T> actual = cabeza;
-            do
-            {
-                if (actual.dato.Equals(item))
-                    return true;
-                actual = actual.siguiente;
-            } while (actual != cabeza);
-            
-            return false;
+            throw new NotImplementedException();
         }
-        
+
         public bool Remove(T item)
         {
-            if (cabeza == null) return false;
-            
-            Nodo<T> actual = cabeza;
-            do
-            {
-                if (actual.dato.Equals(item))
-                {
-                    if (contador == 1)
-                    {
-                        cabeza = null;
-                    }
-                    else
-                    {
-                        actual.anterior.siguiente = actual.siguiente;
-                        actual.siguiente.anterior = actual.anterior;
-                        if (actual == cabeza)
-                            cabeza = actual.siguiente;
-                    }
-                    contador--;
-                    return true;
-                }
-                actual = actual.siguiente;
-            } while (actual != cabeza);
-            
-            return false;
+            throw new NotImplementedException();
         }
-        
+
         public void CopyTo(T[] array, int arrayIndex)
         {
             if (array == null) throw new ArgumentNullException(nameof(array));
@@ -125,5 +91,17 @@ namespace DatosProyectoI.EstructuraDatos
             return GetEnumerator();
         }
 
+        public IIterator<T> GetIterator()
+        {
+            return new ListaCircularIterator<T>(this);
+        }
+
+        // Método para convertir a array
+        public T[] ToArray()
+        {
+            T[] array = new T[contador];
+            CopyTo(array, 0);
+            return array;
+        }
     }
 }

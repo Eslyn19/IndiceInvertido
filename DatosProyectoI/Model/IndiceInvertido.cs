@@ -10,15 +10,15 @@ namespace DatosProyectoI.Model
         
         public IndiceInvertido()
         {
-            Terminos = new string[10000]; // Array fijo para términos
+            Terminos = new string[10000]; // terminos fijos
             DocumentosPorTermino = new FrecuenciaDoc[10000][];
             terminosCont = 0;
         }
 
-        // Agrega un término al índice con su frecuencia en un documento
+        // Agrega un termino al índice con su frecuencia en un documento
         public void AgregarTermino(string termino, int docId, int frecuencia)
         {
-            // Buscar si el término ya existe
+            // Buscar si el termino ya existe
             int indiceTermino = -1;
             for (int i = 0; i < terminosCont; i++)
             {
@@ -37,7 +37,7 @@ namespace DatosProyectoI.Model
                     DocumentosPorTermino[indiceTermino] = new FrecuenciaDoc[1000];
                 }
                 
-                // Buscar espacio libre en el array
+                // Agregar al final
                 for (int i = 0; i < DocumentosPorTermino[indiceTermino].Length; i++)
                 {
                     if (DocumentosPorTermino[indiceTermino][i] == null)
@@ -49,7 +49,7 @@ namespace DatosProyectoI.Model
             }
             else
             {
-                // Nuevo término
+                // agregacion de nuevo termino
                 if (terminosCont < Terminos.Length)
                 {
                     Terminos[terminosCont] = termino;

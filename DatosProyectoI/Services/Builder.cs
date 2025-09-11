@@ -1,5 +1,6 @@
 using DatosProyectoI.Model;
 using DatosProyectoI.Algoritmos;
+using DatosProyectoI.EstructuraDatos;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -10,16 +11,18 @@ namespace DatosProyectoI.Services
     {
         private static Builder instance;
         private static object candado = new object();
-        
+
         private string[] stopwords;
         private IndicePreprocesado indiceActual;
+        private ListaCircular<string> terminosTemporales;
 
         private Builder()
         {
             CargarStopwords();
             indiceActual = new IndicePreprocesado();
+            terminosTemporales = new ListaCircular<string>();
         }
-        
+
         // Patron singleton
         public static Builder getInstance()
         {
@@ -49,20 +52,22 @@ namespace DatosProyectoI.Services
                 {
                     stopwords = new string[0];
                 }
-                
-            } catch(Exception ex) {
+
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine(ex);
                 stopwords = new string[0];
             }
         }
-        
+
         private bool EsStopword(string token)
         {
             if (stopwords == null || stopwords.Length == 0)
             {
                 return false;
             }
-            
+
             for (int i = 0; i < stopwords.Length; i++)
             {
                 if (stopwords[i] == token)
@@ -72,7 +77,7 @@ namespace DatosProyectoI.Services
             }
             return false;
         }
-        
+
         public void ProcesarDocumentos(string ruta, double zipf)
         {
             try
@@ -84,9 +89,9 @@ namespace DatosProyectoI.Services
                 var calculoTF_IDF = CalculoTF_IDF(indiceInvertido, documentos.Length);
 
                 var leyZipf = AplicarLeyZipf(calculoTF_IDF, zipf);
-                
+
                 var docsPreprocesados = CalcularVectoresTFIDF(documentos, leyZipf);
-                
+
                 // Crear indice preprocesado
                 indiceActual = new IndicePreprocesado(
                     documentos.Length,
@@ -96,7 +101,7 @@ namespace DatosProyectoI.Services
                     leyZipf,
                     docsPreprocesados
                 );
-                
+
                 // Guardar en archivo
                 GuardarIndicePreprocesado();
             }
@@ -110,19 +115,19 @@ namespace DatosProyectoI.Services
         {
             return "../../../../Documentos";
         }
-        
+
         private ActualDoc[] CargarTokenizador(string rutaCarpeta)
         {
             var documentos = new List<ActualDoc>();
             string rutaCompleta = Path.GetFullPath(rutaCarpeta);
-            
+
             if (!Directory.Exists(rutaCompleta))
             {
                 return new ActualDoc[0];
             }
-            
+
             string[] archivos = Directory.GetFiles(rutaCompleta, "*.txt");
-            
+
             foreach (string archivo in archivos)
             {
                 try
@@ -130,10 +135,10 @@ namespace DatosProyectoI.Services
                     string nombre = Path.GetFileName(archivo);
                     string contenido = File.ReadAllText(archivo, Encoding.UTF8);
                     string url = Decodificador.DecodificarArchivo(nombre);
-                    
+
                     // Tokenización y filtrado de stopwords
                     string[] tokens = Tokenizador(contenido);
-                    
+
                     documentos.Add(new ActualDoc(nombre, url, contenido, tokens));
                 }
                 catch (Exception ex)
@@ -141,53 +146,47 @@ namespace DatosProyectoI.Services
                     Console.WriteLine(ex);
                 }
             }
-            
+
             return documentos.ToArray();
         }
-        
+
         private string[] Tokenizador(string texto)
         {
+            // Limpiar la lista circular de términos temporales
+            terminosTemporales.Clear();
+
             string normalizar = Regex.Replace(texto.ToLower(), @"[^\w\s]", " ");
-            
+
             // Dividir en tokens
-            string[] tokens = normalizar.Split(new char[] { ' ', '\n' }, 
+            string[] tokens = normalizar.Split(new char[] { ' ', '\n' },
                 StringSplitOptions.RemoveEmptyEntries);
-            
-            string[] tokensFiltrados = new string[tokens.Length];
-            int cont = 0; // cantidad tokens filtrados
-            
+
+            // Usar lista circular para almacenar términos filtrados
             foreach (string token in tokens)
             {
                 if (token.Length > 2 && !EsStopword(token))
                 {
-                    tokensFiltrados[cont] = token;
-                    cont++;
+                    terminosTemporales.Add(token);
                 }
             }
-            
-       
-            string[] result = new string[cont];
-            for (int i = 0; i < cont; i++)
-            {
-                result[i] = tokensFiltrados[i];
-            }
-            
-            return result;
+
+            // Convertir lista circular a array
+            return terminosTemporales.ToArray();
         }
-        
+
         private IndiceInvertido CrearIndiceInvertido(ActualDoc[] documentos)
         {
             var indice = new IndiceInvertido();
-            
+
             for (int k = 0; k < documentos.Length; k++)
             {
                 var documento = documentos[k];
-                
+
                 // Contar frecuencias de términos en este documento usando arrays
                 string[] terminosUnicos = new string[documento.Tokens.Length];
                 int[] frecuencias = new int[documento.Tokens.Length];
                 int terminosCount = 0;
-                
+
                 foreach (string token in documento.Tokens)
                 {
                     // Buscar si el término ya existe
@@ -200,7 +199,7 @@ namespace DatosProyectoI.Services
                             break;
                         }
                     }
-                    
+
                     if (indiceTermino >= 0)
                     {
                         frecuencias[indiceTermino]++;
@@ -212,39 +211,39 @@ namespace DatosProyectoI.Services
                         terminosCount++;
                     }
                 }
-                
+
                 // Agregar al índice invertido
                 for (int i = 0; i < terminosCount; i++)
                 {
                     indice.AgregarTermino(terminosUnicos[i], k, frecuencias[i]);
                 }
             }
-            
+
             return indice;
         }
-        
+
         private Termino[] CalculoTF_IDF(IndiceInvertido index, int N)
         {
             Termino[] terminos = new Termino[index.terminosCont];
-            
+
             for (int i = 0; i < index.terminosCont; i++)
             {
                 string palabra = index.Terminos[i];
                 var documentos = index.ObtenerDocumentos(palabra);
-                
+
                 // Calcular df
                 int df = documentos.Length;
-                
+
                 // Calcular IDF
                 double idf = Math.Log10((double)N / df);
-                
+
                 // Crear string de documentos con frecuencias
                 string[] docStrings = new string[documentos.Length];
                 for (int j = 0; j < documentos.Length; j++)
                 {
                     docStrings[j] = $"D{documentos[j].DocId + 1}:{documentos[j].Frecuencia}";
                 }
-                
+
                 string frecuencia = "";
                 for (int k = 0; k < docStrings.Length; k++)
                 {
@@ -254,10 +253,10 @@ namespace DatosProyectoI.Services
 
                 terminos[i] = new Termino(palabra, df, idf, frecuencia);
             }
-            
+
             return terminos;
         }
-        
+
         private Termino[] AplicarLeyZipf(Termino[] terminos, double porc)
         {
             // Crear copia del array para ordenar
@@ -266,37 +265,37 @@ namespace DatosProyectoI.Services
             {
                 ordenados[i] = terminos[i];
             }
-            
+
             OrdenamientoRadix.RadixSort(ordenados);
-            
+
             // Calcular cuantos terminos dejarse
             int Total = ordenados.Length;
-            int terminosMantenidos = (int)Math.Ceiling(Total  * (1.0 - porc / 100.0));
-            
+            int terminosMantenidos = (int)Math.Ceiling(Total * (1.0 - porc / 100.0));
+
             // Arreglo de terminos mantenidos
             Termino[] res = new Termino[terminosMantenidos];
             for (int i = 0; i < terminosMantenidos; i++)
             {
                 res[i] = ordenados[i];
             }
-            
+
             return res;
         }
-        
+
         private Documento[] CalcularVectoresTFIDF(ActualDoc[] documentos, Termino[] terminos)
         {
             var documentosPreprocesados = new Documento[documentos.Length];
-            
+
             for (int docId = 0; docId < documentos.Length; docId++)
             {
                 var documento = documentos[docId];
                 var vector = new double[terminos.Length];
-                
+
                 // Contar frecuencias por documento
                 string[] terminosUnicos = new string[documento.Tokens.Length];
                 int[] frecuencias = new int[documento.Tokens.Length];
                 int cont = 0;
-                
+
                 foreach (string token in documento.Tokens)
                 {
                     // Buscar si el término ya existe
@@ -309,7 +308,7 @@ namespace DatosProyectoI.Services
                             break;
                         }
                     }
-                    
+
                     if (indiceTermino >= 0)
                     {
                         frecuencias[indiceTermino]++;
@@ -321,12 +320,12 @@ namespace DatosProyectoI.Services
                         cont++;
                     }
                 }
-                
+
                 // Calcular TF-IDF para cada término
                 for (int termId = 0; termId < terminos.Length; termId++)
                 {
                     var termino = terminos[termId];
-                    
+
                     // Buscar frecuencia del término en este documento
                     int tf = 0;
                     for (int i = 0; i < cont; i++)
@@ -334,10 +333,10 @@ namespace DatosProyectoI.Services
                         if (terminosUnicos[i] == termino.palabra)
                         {
                             tf = frecuencias[i];
-                        break;
+                            break;
                         }
                     }
-                    
+
                     if (tf > 0)
                     {
                         double tfidf = tf * termino.IDF;
@@ -348,7 +347,7 @@ namespace DatosProyectoI.Services
                         vector[termId] = 0.0;
                     }
                 }
-                
+
                 documentosPreprocesados[docId] = new Documento(
                     documento.Nombre,
                     documento.URL,
@@ -356,22 +355,22 @@ namespace DatosProyectoI.Services
                     vector
                 );
             }
-            
+
             return documentosPreprocesados;
         }
-        
+
         private void GuardarIndicePreprocesado()
         {
             try
             {
                 string rutaArchivo = "../../../../indicePreprocesado.json";
-                
+
                 var opciones = new JsonSerializerOptions
                 {
                     WriteIndented = true,
                     Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
                 };
-                
+
                 string json = JsonSerializer.Serialize(indiceActual, opciones);
                 File.WriteAllText(rutaArchivo, json, Encoding.UTF8);
             }
@@ -380,19 +379,19 @@ namespace DatosProyectoI.Services
                 Console.WriteLine($"Error al guardar indice, {ex.Message}");
             }
         }
-        
+
         public void CargarIndicePreprocesado()
         {
             try
             {
                 string rutaArchivo = "../../../../indicePreprocesado.json";
-                
+
                 if (!File.Exists(rutaArchivo))
                 {
                     Console.WriteLine($"El archivo {rutaArchivo} no existe");
                     return;
                 }
-                
+
                 string json = File.ReadAllText(rutaArchivo, Encoding.UTF8);
                 indiceActual = JsonSerializer.Deserialize<IndicePreprocesado>(json);
             }
@@ -406,14 +405,14 @@ namespace DatosProyectoI.Services
         {
             // Tokenizar consulta
             string[] tokensConsulta = Tokenizador(consulta);
-            
+
             // Crear vector de consulta
             var vectorConsulta = new double[indiceActual.totalTerms];
-            
+
             for (int i = 0; i < indiceActual.totalTerms; i++)
             {
                 string termino = indiceActual.terminos[i];
-                
+
                 if (tokensConsulta.Contains(termino))
                 {
                     vectorConsulta[i] = indiceActual.terminosDet[i].IDF;
@@ -423,12 +422,12 @@ namespace DatosProyectoI.Services
                     vectorConsulta[i] = 0.0;
                 }
             }
-            
+
             // Calcular similitud coseno con cada documento
             int[] docIds = new int[indiceActual.totalDocs];
             double[] similitudes = new double[indiceActual.totalDocs];
             int resultadosCount = 0;
-            
+
             for (int docId = 0; docId < indiceActual.totalDocs; docId++)
             {
                 double similitud = CalcularCoseno(vectorConsulta, indiceActual.documentos[docId].arrIDF);
@@ -439,14 +438,14 @@ namespace DatosProyectoI.Services
                     resultadosCount++;
                 }
             }
-            
+
             // Ordenar por similitud descendente usando Bubble Sort
             OrdenamientoBorbuja(similitudes, docIds, resultadosCount);
-            
+
             Console.WriteLine($"\nConsulta: '{consulta}'");
             string[] terminosEncontrados = new string[tokensConsulta.Length];
             int terminosEncontradosCount = 0;
-            
+
             for (int i = 0; i < tokensConsulta.Length; i++)
             {
                 string token = tokensConsulta[i];
@@ -460,7 +459,7 @@ namespace DatosProyectoI.Services
                     }
                 }
             }
-            
+
             // Crear string de términos encontrados
             string terminosStr = "";
             for (int i = 0; i < terminosEncontradosCount; i++)
@@ -468,11 +467,11 @@ namespace DatosProyectoI.Services
                 if (i > 0) terminosStr += ", ";
                 terminosStr += terminosEncontrados[i];
             }
-            
+
             Console.WriteLine($"Términos encontrados: {terminosStr}");
             Console.WriteLine($"\nTop 10: ");
             Console.WriteLine("Documento\tSimilitud\tURL");
-            
+
             for (int i = 0; i < Math.Min(10, resultadosCount); i++)
             {
                 int docId = docIds[i];
@@ -495,7 +494,7 @@ namespace DatosProyectoI.Services
                         double tempSim = similitudes[j];
                         similitudes[j] = similitudes[j + 1];
                         similitudes[j + 1] = tempSim;
-                        
+
                         // Intercambiar docIds
                         int tempDoc = docIds[j];
                         docIds[j] = docIds[j + 1];
@@ -507,14 +506,15 @@ namespace DatosProyectoI.Services
 
         private double CalcularCoseno(double[] arr, double[] arr2)
         {
-            if (arr.Length != arr2.Length) { 
+            if (arr.Length != arr2.Length)
+            {
                 return 0.0;
             }
-            
+
             double productoPunto = 0.0;
-            double magnitud = 0.0; 
+            double magnitud = 0.0;
             double magnitud2 = 0.0;
-            
+
             for (int i = 0; i < arr.Length; i++)
             {
                 productoPunto += arr[i] * arr2[i];
@@ -526,10 +526,10 @@ namespace DatosProyectoI.Services
             {
                 return 0.0;
             }
-            
+
             return productoPunto / (Math.Sqrt(magnitud) * Math.Sqrt(magnitud2));
         }
     }
-    
 }
+
 

@@ -105,14 +105,36 @@ namespace DatosProyectoI.UI
         
         private void OpcionConsulta()
         {
-            Console.Clear();
-            Console.WriteLine("=== REALIZAR CONSULTA ===");
-            Console.WriteLine();
+            bool continuar = true;
             
-            Console.Write("Ingrese su consulta: ");
-            string consulta = Console.ReadLine();
-            
-            builder.Consultar(consulta);
+            while (continuar)
+            {
+                Console.Clear();
+                Console.WriteLine("=== REALIZAR CONSULTA ===");
+                Console.WriteLine("Escriba 'SALIR' para volver al menú principal");
+                Console.WriteLine();
+                
+                Console.Write("Ingrese su consulta: ");
+                string consulta = Console.ReadLine();
+                
+                if (consulta?.ToUpper() == "SALIR")
+                {
+                    continuar = false;
+                }
+                else if (!string.IsNullOrWhiteSpace(consulta))
+                {
+                    builder.Consultar(consulta);
+                    
+                    Console.WriteLine();
+                    Console.WriteLine("Presione Enter para hacer otra consulta...");
+                    Console.ReadLine();
+                }
+                else
+                {
+                    Console.WriteLine("Consulta inválida. Presione Enter para continuar...");
+                    Console.ReadLine();
+                }
+            }
         }
         
     }
