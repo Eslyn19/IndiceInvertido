@@ -66,7 +66,7 @@ namespace DatosProyectoI.UI
             Console.WriteLine("=== PROCESAR DOCUMENTOS ===");
             Console.WriteLine();
             
-            string rutaDocs = "../../../../Documentos";
+            string rutaDocs = builder.CrearDesdeRuta();
             Console.WriteLine($"Ruta de documentos: {rutaDocs}");
             
             Console.WriteLine();
@@ -75,7 +75,7 @@ namespace DatosProyectoI.UI
             
             if (!double.TryParse(porcentajeStr, out double porcentaje) || porcentaje < 0 || porcentaje > 40)
             {
-                Console.WriteLine("Porcentaje invalido. Usando 20% por defecto.");
+                Console.WriteLine("Porcentaje inválido. Usando 20% por defecto.");
                 porcentaje = 20.0;
             }
             

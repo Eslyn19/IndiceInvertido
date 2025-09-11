@@ -105,6 +105,11 @@ namespace DatosProyectoI.Services
                 Console.WriteLine($"Error durante el procesamiento: {ex.Message}");
             }
         }
+
+        public string CrearDesdeRuta()
+        {
+            return "../../../../Documentos";
+        }
         
         private ActualDoc[] CargarTokenizador(string rutaCarpeta)
         {
