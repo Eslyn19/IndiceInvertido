@@ -30,6 +30,8 @@ namespace DatosProyectoI.Services
         {
             get
             {
+                if (instance == null)
+        {
                 // garantiza que un hilo no ingrese a una sección crítica del código mientras que otro hilo esté
                 // en la sección crítica. Si otro hilo intenta ingresar un código bloqueado,
                 // esperará y bloqueará hasta que se libere el objeto. (Microsoft)
@@ -40,6 +42,7 @@ namespace DatosProyectoI.Services
                         instance = new Builder();
                     }
                 }
+             }
                 return instance;
             }
 
@@ -465,9 +468,20 @@ namespace DatosProyectoI.Services
             {
                 string termino = indiceActual.terminos[i];
 
-                if (tokensConsulta.Contains(termino))
+                // Contar frecuencia del término en la consulta (TF)
+                int tf = 0;
+                for (int j = 0; j < tokensConsulta.Length; j++)
                 {
-                    vectorConsulta[i] = indiceActual.terminosDet[i].IDF;
+                    if (tokensConsulta[j] == termino)
+                    {
+                        tf++;
+                    }
+                }
+
+                // Calcular TF-IDF para la consulta (TF lineal)
+                if (tf > 0)
+                {
+                    vectorConsulta[i] = tf * indiceActual.terminosDet[i].IDF;
                 }
                 else
                 {
@@ -579,8 +593,8 @@ namespace DatosProyectoI.Services
                 return 0.0;
             }
 
-            // devolver resultado de 𝐶𝑜𝑠(θ)
-            return productoPunto / (Math.Sqrt(A) * Math.Sqrt(B)); // ->  (𝐴 ∗ 𝐵)  /  ||𝐴|| ∗ ||𝐵||
+            //return productoPunto / Math.Sqrt(A) * Math.Sqrt(B);
+            return productoPunto / Math.Sqrt(B);
         }
 
     }
