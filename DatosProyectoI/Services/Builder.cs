@@ -47,7 +47,7 @@ namespace DatosProyectoI.Services
         // Cargar el archivo .JSON con stops words
         private void CargarStopwords()
         {
-            string ruta = "Stopwords.json";
+            string ruta = "../../../../Stopwords.json";
             try
             {
                 if (File.Exists(ruta))
@@ -60,13 +60,14 @@ namespace DatosProyectoI.Services
                 }
                 else
                 {
+                    Console.WriteLine("Archivo Stopwords.json no encontrado");
                     stopwords = new string[0];
                 }
 
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Error al cargar stopwords: {ex.Message}");
                 stopwords = new string[0];
             }
         }
