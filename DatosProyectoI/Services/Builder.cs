@@ -11,8 +11,8 @@ namespace DatosProyectoI.Services
 {
     public class Builder
     {
-        private static Builder instance;
-        private static object candado = new object();
+        private static Builder instance = null;
+        private static readonly object padlock = new object();
 
         private string[] stopwords;
         private IndicePreprocesado indiceActual;
@@ -26,22 +26,23 @@ namespace DatosProyectoI.Services
         }
 
         // Patron singleton
-        public static Builder getInstance()
+        public static Builder Instance
         {
-            if (instance == null)
+            get
             {
                 // garantiza que un hilo no ingrese a una sección crítica del código mientras que otro hilo esté
                 // en la sección crítica. Si otro hilo intenta ingresar un código bloqueado,
                 // esperará y bloqueará hasta que se libere el objeto. (Microsoft)
-                lock (candado)
+                lock (padlock)
                 {
                     if (instance == null)
                     {
                         instance = new Builder();
                     }
                 }
+                return instance;
             }
-            return instance;
+
         }
 
         // Cargar el archivo .JSON con stops words

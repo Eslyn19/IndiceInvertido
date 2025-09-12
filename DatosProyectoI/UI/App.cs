@@ -11,7 +11,7 @@ namespace DatosProyectoI.UI
 
         public App()
         {
-            builder = Builder.getInstance();
+            this.builder = Builder.Instance;
         }
 
         public void IniciarAplicacion()
