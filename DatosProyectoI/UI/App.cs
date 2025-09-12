@@ -8,36 +8,30 @@ namespace DatosProyectoI.UI
     internal class App
     {
         private Builder builder;
-        
+
         public App()
         {
             builder = Builder.getInstance();
         }
-        
-        public void IniciarAplicacion() 
+
+        public void IniciarAplicacion()
         {
             MostrarMenu();
         }
 
         private void MostrarMenu()
         {
-            bool continuar = true;
-            
-            while (continuar)
+            while (true)
             {
                 Console.Clear();
-                Console.WriteLine("=== SISTEMA DE BÚSQUEDA CON ÍNDICE PREPROCESADO ===");
-                Console.WriteLine();
-                Console.WriteLine("Opciones:");
-                Console.WriteLine("1. Procesar documentos y crear índice preprocesado");
-                Console.WriteLine("2. Cargar índice preprocesado existente");
-                Console.WriteLine("3. Realizar consulta");
-                Console.WriteLine("0. Salir");
-                Console.WriteLine();
-                Console.Write("Seleccione una opción: ");
-                
+                Console.WriteLine("Estructura de datos: índice invertido\n");
+                Console.WriteLine("1. Crear indice invertido");
+                Console.WriteLine("2. Cargar indice preprocesado existente");
+                Console.WriteLine("3. Realizar consulta\n");
+                Console.Write("Opcion: ");
+
                 string opcion = Console.ReadLine();
-                
+
                 switch (opcion)
                 {
                     case "1":
@@ -50,92 +44,80 @@ namespace DatosProyectoI.UI
                         OpcionConsulta();
                         break;
                     case "0":
-                        continuar = false;
                         break;
                     default:
-                        Console.WriteLine("Opcion invalida");
-                        Console.ReadLine();
                         break;
                 }
             }
         }
-        
+
         private void OpcionProcesarDocumentos()
         {
             Console.Clear();
-            Console.WriteLine("=== PROCESAR DOCUMENTOS ===");
-            Console.WriteLine();
-            
+            Console.WriteLine("Procesando documentos");
+
             string rutaDocs = builder.CrearDesdeRuta();
             Console.WriteLine($"Ruta de documentos: {rutaDocs}");
-            
-            Console.WriteLine();
-            Console.Write("Ingrese el porcentaje de reducción con la ley de Zipf (0-40): ");
-            string porcentajeStr = Console.ReadLine();
-            
-            if (!double.TryParse(porcentajeStr, out double porcentaje) || porcentaje < 0 || porcentaje > 40)
+
+            double porcentaje = 0.0;
+            Console.Write("\nDigite un porcentaje para la Ley de Zipf (0% - 40%): ");
+            try
             {
-                Console.WriteLine("Porcentaje inválido. Usando 20% por defecto.");
-                porcentaje = 20.0;
+                porcentaje = Convert.ToDouble(Console.ReadLine());
+                if (porcentaje < 0 || porcentaje > 40)
+                {
+                    porcentaje = 10.0; // Dar por defecto
+                }
             }
-            
-            Console.WriteLine();
-            Console.WriteLine("Procesando documentos...");
-            
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            Console.WriteLine("\nProcesando documentos...");
+
             builder.ProcesarDocumentos(rutaDocs, porcentaje);
-            
-            Console.WriteLine();
-            Console.WriteLine("Presione Enter para continuar...");
+
+            Console.WriteLine("\nIndice creado correctamente!");
             Console.ReadLine();
         }
-        
+
         private void OpcionCargarIndice()
         {
             Console.Clear();
-            Console.WriteLine("=== CARGAR ÍNDICE PREPROCESADO ===");
-            Console.WriteLine();
-            
-            Console.WriteLine("Cargando índice preprocesado...");
-            builder.CargarIndicePreprocesado();
-            
-            Console.WriteLine();
-            Console.WriteLine("Presione Enter para continuar...");
-            Console.ReadLine();
+            Console.WriteLine("Cargando indice preprocesado existente...\n");
+
+            try
+            {
+                builder.CargarIndicePreprocesado();
+                Console.WriteLine("Cargado correctamente!");
+                Console.ReadLine();
+            } 
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
-        
+
         private void OpcionConsulta()
         {
-            bool continuar = true;
-            
-            while (continuar)
+            while (true)
             {
                 Console.Clear();
-                Console.WriteLine("=== REALIZAR CONSULTA ===");
-                Console.WriteLine("Escriba 'SALIR' para volver al menú principal");
-                Console.WriteLine();
-                
-                Console.Write("Ingrese su consulta: ");
+                Console.Write("Buscar consulta: ");
                 string consulta = Console.ReadLine();
-                
-                if (consulta?.ToUpper() == "SALIR")
+
+                if (consulta == "SALIR")
                 {
-                    continuar = false;
-                }
-                else if (!string.IsNullOrWhiteSpace(consulta))
-                {
-                    builder.Consultar(consulta);
-                    
-                    Console.WriteLine();
-                    Console.WriteLine("Presione Enter para hacer otra consulta...");
-                    Console.ReadLine();
+                    break;
                 }
                 else
                 {
-                    Console.WriteLine("Consulta inválida. Presione Enter para continuar...");
+                    builder.Consultar(consulta);
                     Console.ReadLine();
                 }
             }
         }
-        
+
     }
 }

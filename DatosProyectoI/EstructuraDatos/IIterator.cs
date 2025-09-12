@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace DatosProyectoI.EstructuraDatos
 {
+    // Interfaz del patron iterador
     internal interface IIterator<T>
     {
-        T Current { get; }
-        bool HasNext();
+        T Actual { get; }
         T Next();
+        bool HasNext();
+
     }
 }

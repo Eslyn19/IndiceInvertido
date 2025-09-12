@@ -4,18 +4,19 @@ namespace DatosProyectoI.Services
 {
     internal class Decodificador
     {
-        public static string DecodificarArchivo(string file)
+        public static string DecodificarArchivo(string archivo)
         {
             try
             {
-                string nuevaRuta = file;
+                string nuevaRuta = archivo;
                 if (nuevaRuta.EndsWith(".txt"))
                 {
+                    // Extrae los ultimos 4 digitos -> .txt
                     nuevaRuta = nuevaRuta.Substring(0, nuevaRuta.Length - 4);
                 }
 
-                byte[] Bytes = Convert.FromBase64String(nuevaRuta);
-                string nuevaURL = Encoding.UTF8.GetString(Bytes);
+                byte[] getBytes = Convert.FromBase64String(nuevaRuta);
+                string nuevaURL = Encoding.UTF8.GetString(getBytes);
                 
                 return nuevaURL;
             }

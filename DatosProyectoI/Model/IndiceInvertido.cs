@@ -5,13 +5,13 @@ namespace DatosProyectoI.Model
     public class IndiceInvertido
     {
         public string[] Terminos { get; set; }
-        public FrecuenciaDoc[][] DocumentosPorTermino { get; set; }
+        public FrecuenciaDocumento[][] DocumentosPorTermino { get; set; }
         public int terminosCont { get; set; }
         
         public IndiceInvertido()
         {
             Terminos = new string[10000]; // terminos fijos
-            DocumentosPorTermino = new FrecuenciaDoc[10000][];
+            DocumentosPorTermino = new FrecuenciaDocumento[10000][];
             terminosCont = 0;
         }
 
@@ -34,7 +34,7 @@ namespace DatosProyectoI.Model
                 // Término existe, agregar documento
                 if (DocumentosPorTermino[indiceTermino] == null)
                 {
-                    DocumentosPorTermino[indiceTermino] = new FrecuenciaDoc[1000];
+                    DocumentosPorTermino[indiceTermino] = new FrecuenciaDocumento[1000];
                 }
                 
                 // Agregar al final
@@ -42,7 +42,7 @@ namespace DatosProyectoI.Model
                 {
                     if (DocumentosPorTermino[indiceTermino][i] == null)
                     {
-                        DocumentosPorTermino[indiceTermino][i] = new FrecuenciaDoc(docId, frecuencia);
+                        DocumentosPorTermino[indiceTermino][i] = new FrecuenciaDocumento(docId, frecuencia);
                         break;
                     }
                 }
@@ -53,15 +53,15 @@ namespace DatosProyectoI.Model
                 if (terminosCont < Terminos.Length)
                 {
                     Terminos[terminosCont] = termino;
-                    DocumentosPorTermino[terminosCont] = new FrecuenciaDoc[1000];
-                    DocumentosPorTermino[terminosCont][0] = new FrecuenciaDoc(docId, frecuencia);
+                    DocumentosPorTermino[terminosCont] = new FrecuenciaDocumento[1000];
+                    DocumentosPorTermino[terminosCont][0] = new FrecuenciaDocumento(docId, frecuencia);
                     terminosCont++;
                 }
             }
         }
 
         // Retorna todos los documentos que contienen un termino especifico
-        public FrecuenciaDoc[] ObtenerDocumentos(string termino)
+        public FrecuenciaDocumento[] ObtenerDocumentos(string termino)
         {
             for (int i = 0; i < terminosCont; i++)
             {
@@ -69,7 +69,7 @@ namespace DatosProyectoI.Model
                 {
                     if (DocumentosPorTermino[i] == null)
                     {
-                        return new FrecuenciaDoc[0];
+                        return new FrecuenciaDocumento[0];
                     }
                     
                     // Contar documentos no nulos
@@ -87,7 +87,7 @@ namespace DatosProyectoI.Model
                     }
                     
                     // Crear array del tamaño exacto
-                    FrecuenciaDoc[] resultado = new FrecuenciaDoc[count];
+                    FrecuenciaDocumento[] resultado = new FrecuenciaDocumento[count];
                     for (int j = 0; j < count; j++)
                     {
                         resultado[j] = DocumentosPorTermino[i][j];
@@ -96,7 +96,7 @@ namespace DatosProyectoI.Model
                     return resultado;
                 }
             }
-            return new FrecuenciaDoc[0];
+            return new FrecuenciaDocumento[0];
         }
     }
 }

@@ -3,11 +3,12 @@ using DatosProyectoI.Model;
 
 namespace DatosProyectoI.EstructuraDatos
 {
+    // Lista circular doblemente enlazada
     internal class ListaCircular<T> : ICollection<T>
     {
         internal Nodo<T> cabeza;
         
-        private int contador;
+        private int contador; // Numero total de elementos en la lista
         
         public ListaCircular()
         {
@@ -15,10 +16,11 @@ namespace DatosProyectoI.EstructuraDatos
             contador = 0;
         }
 
-        // Metodos implementados de Libreria ICollection
-        public int Count => contador;
-        public bool IsReadOnly => false;
+        // Metodos implementados de Libreria ICollection 
+        public int Count => contador; // propiedad de lectura
+        public bool IsReadOnly => false; // cuerpo de lectura
         
+        // Añadr elementos a la lista
         public void Add(T item)
         {
             Nodo<T> nuevo = new Nodo<T>(item);
@@ -40,6 +42,7 @@ namespace DatosProyectoI.EstructuraDatos
             contador++;
         }
 
+        // vaciar lista
         public void Clear()
         {
             cabeza = null;
@@ -56,34 +59,46 @@ namespace DatosProyectoI.EstructuraDatos
             throw new NotImplementedException();
         }
 
-        public void CopyTo(T[] array, int arrayIndex)
+        // Copia los elementos de la lista en un array de tipo T
+        // a partir de un indice especifico.
+        public void CopyTo(T[] array, int IndiceArreglo)
         {
-            if (array == null) throw new ArgumentNullException(nameof(array));
-            if (arrayIndex < 0) throw new ArgumentOutOfRangeException(nameof(arrayIndex));
-            if (array.Length - arrayIndex < contador) throw new ArgumentException("Array no tiene suficiente espacio");
-            
-            if (cabeza == null) return;
-            
-            Nodo<T> actual = cabeza;
-            int index = arrayIndex;
-            do
+            if (cabeza == null)
             {
-                array[index] = actual.dato;
-                actual = actual.siguiente;
-                index++;
-            } while (actual != cabeza);
+                return;
+            }
+            else
+            {
+                Nodo<T> actual = cabeza;
+                int i = IndiceArreglo;
+                do
+                {
+                    array[i] = actual.dato;
+                    actual = actual.siguiente;
+                    i++;
+                } while (actual != cabeza);
+            }
         }
         
+        // Metodo para que la lista sea iterable
         public IEnumerator<T> GetEnumerator()
         {
-            if (cabeza == null) yield break;
-            
-            Nodo<T> actual = cabeza;
-            do
+            // *yield* devuelve cada elemento uno por uno sin
+            // necesidad de crear una nueva colección temporal.
+            if (cabeza == null)
             {
-                yield return actual.dato;
-                actual = actual.siguiente;
-            } while (actual != cabeza);
+                yield break;
+            }
+            else
+            {
+
+                Nodo<T> actual = cabeza;
+                do
+                {
+                    yield return actual.dato;
+                    actual = actual.siguiente;
+                } while (actual != cabeza);
+            }
         }
         
         IEnumerator IEnumerable.GetEnumerator()
@@ -96,12 +111,12 @@ namespace DatosProyectoI.EstructuraDatos
             return new ListaCircularIterator<T>(this);
         }
 
-        // Método para convertir a array
+        // Convierte la lista en array
         public T[] ToArray()
         {
-            T[] array = new T[contador];
-            CopyTo(array, 0);
-            return array;
+            T[] arreglo = new T[contador];
+            CopyTo(arreglo, 0);
+            return arreglo;
         }
     }
 }

@@ -7,7 +7,7 @@
 * Proyecto 1 |
 * | Estudiantes:
 * 2-0838-0902; Jara Calderon, Eslyn |
-* 2-0864-0831; Mishelle Rojas Chacon
+* 2-0864-0831; Rojas Chacon, Mishelle |
 * 7-0311-0431; Blanco Mora, Jeancarlo |
 * |
 * version 1.0.0

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DatosProyectoI.EstructuraDatos
 {
@@ -11,7 +12,7 @@ namespace DatosProyectoI.EstructuraDatos
     {
         private ListaCircular<T> lista;
         private Nodo<T> actual;
-        private bool inicial;
+        private bool inicial; // bandera para devolver primer elemento
 
         public ListaCircularIterator(ListaCircular<T> lista)
         {
@@ -20,34 +21,31 @@ namespace DatosProyectoI.EstructuraDatos
             this.inicial = false;
         }
 
-        public T Current => actual.dato;
+        // Devuelve el nodo actual del iterador
+        public T Actual => actual.dato;
 
-        public bool HasNext()
-        {
-            return lista.Count > 0;
-        }
+        // Comprueba si hay siguiente elemento en lista
+        public bool HasNext() { return lista.Count > 0; }
 
         public T Next()
         {
+            // Si vacia
             if (lista.Count == 0)
             {
-                return default(T);
+                return default;
             }
 
+            // Devuelve el dato del nodo cabeza sin avanzar el puntero actual.
             if (!inicial)
             {
                 inicial = true;
                 return actual.dato;
             }
 
+            // Avanzar al siguiente y retornar dato
             actual = actual.siguiente;
             return actual.dato;
         }
 
-        public void Reset()
-        {
-            actual = lista.cabeza;
-            inicial = false;
-        }
     }
 }
