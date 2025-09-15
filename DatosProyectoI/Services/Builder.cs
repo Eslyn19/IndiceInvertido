@@ -1,8 +1,6 @@
 using DatosProyectoI.Algoritmos;
 using DatosProyectoI.EstructuraDatos;
 using DatosProyectoI.Model;
-using System.Diagnostics;
-using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -31,7 +29,7 @@ namespace DatosProyectoI.Services
             get
             {
                 if (instance == null)
-        {
+                {
                 // garantiza que un hilo no ingrese a una sección crítica del código mientras que otro hilo esté
                 // en la sección crítica. Si otro hilo intenta ingresar un código bloqueado,
                 // esperará y bloqueará hasta que se libere el objeto. (Microsoft)
@@ -590,7 +588,7 @@ namespace DatosProyectoI.Services
 
             if (A == 0.0 || B == 0.0)
             {
-                return 0.0;
+                return 0.0; 
             }
 
             //return productoPunto / Math.Sqrt(A) * Math.Sqrt(B);
